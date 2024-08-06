@@ -83,8 +83,10 @@ class _BluetoothAppState extends State<BluetoothApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blueGrey[900], // Fondo azul oscuro
       appBar: AppBar(
         title: Text('Bluetooth Scanner'),
+        backgroundColor: Colors.blueGrey[800], // Color de fondo del AppBar
         actions: [
           _isDiscovering
               ? Padding(
@@ -99,15 +101,30 @@ class _BluetoothAppState extends State<BluetoothApp> {
         ],
       ),
       body: _devicesList.isEmpty
-          ? Center(child: Text("No hay dispositivos encontrados"))
+          ? Center(
+              child: Text(
+                "No hay dispositivos encontrados",
+                style: TextStyle(color: Colors.white), // Texto en blanco
+              ),
+            )
           : ListView.builder(
               itemCount: _devicesList.length,
               itemBuilder: (context, index) {
                 BluetoothDiscoveryResult result = _devicesList[index];
                 return ListTile(
-                  title: Text(result.device.name ?? "Unknown Device"),
-                  subtitle: Text(result.device.address.toString()),
-                  trailing: Text(result.rssi.toString()),
+                  tileColor: Colors.blueGrey[900], // Fondo de cada ítem en la lista
+                  title: Text(
+                    result.device.name ?? "Unknown Device",
+                    style: TextStyle(color: Colors.white), // Texto en blanco
+                  ),
+                  subtitle: Text(
+                    result.device.address.toString(),
+                    style: TextStyle(color: Colors.grey[300]), // Texto secundario en gris claro
+                  ),
+                  trailing: Text(
+                    result.rssi.toString(),
+                    style: TextStyle(color: Colors.white), // Texto en blanco
+                  ),
                   onTap: () {
                     _connectToDevice(result.device);
                   },

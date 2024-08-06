@@ -11,6 +11,7 @@ class ChartsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Gráfico de Datos'),
+        
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
