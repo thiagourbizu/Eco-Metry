@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'charts.dart'; // Importar el nuevo archivo para el gráfico
+import 'charts.dart'; // Importar el archivo para el gráfico
 
 class ConnectionScreen extends StatefulWidget {
   final BluetoothDevice device;
@@ -15,6 +15,8 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   BluetoothConnection? connection;
   List<double> receivedData = [];
   bool isConnecting = true;
+  double currentTemperature = 0.0;
+  double currentSpeed = 0.0;
 
   @override
   void initState() {
@@ -34,12 +36,21 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
       connection!.input!.listen((data) {
         setState(() {
           String valueString = String.fromCharCodes(data).trim();
-          double value =
-              double.tryParse(valueString) ?? 0.0; // Convertir a double
+          List<String> values = valueString.split(','); // Suponiendo que los datos vienen separados por comas
+
+          if (values.length == 2) {
+            double tempValue = double.tryParse(values[0]) ?? 0.0; // Convertir a double
+            double speedValue = double.tryParse(values[1]) ?? 0.0; // Convertir a double
+
+            currentTemperature = tempValue;
+            currentSpeed = speedValue;
+          }
+
+          // Añadir valores a la lista de datos recibidos para graficar
           if (receivedData.length >= 30) {
             receivedData.removeAt(0); // Eliminar el dato más antiguo
           }
-          receivedData.add(value); // Añadir el valor recibido
+          receivedData.add(currentSpeed); // Añadir el valor de velocidad a la lista
         });
       }).onDone(() {
         print('Conexión cerrada');
@@ -80,11 +91,17 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     super.dispose();
   }
 
+  void _navigateToChart(String chartType) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChartsScreen(data: receivedData),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    double currentTemperature =
-        receivedData.isNotEmpty ? receivedData.last : 0.0;
-
     return Scaffold(
       backgroundColor: Colors.blueGrey[900],
       appBar: AppBar(
@@ -106,60 +123,111 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                 ),
               ),
             SizedBox(height: 20),
-            Container(
-              padding: EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.blueGrey[700],
-                borderRadius: BorderRadius.circular(12.0),
-                border: Border.all(
-                  color: Colors.blueGrey[300]!,
-                  width: 2.0,
+            Row(
+              children: [
+                Expanded(
+                  child: AspectRatio(
+                    aspectRatio: 1.0, // Proporción de aspecto 1:1 para mantener la altura igual
+                    child: GestureDetector(
+                      onTap: () => _navigateToChart('temperature'),
+                      child: Container(
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.blueGrey[700],
+                          borderRadius: BorderRadius.circular(12.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 8,
+                              offset: Offset(0, 4), // cambios en la posición de la sombra
+                            ),
+                          ],
+                          border: Border.all(
+                            color: Colors.blueGrey[300]!,
+                            width: 2.0,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Temperatura',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              '${currentTemperature.toStringAsFixed(1)} °C',
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'Temperatura',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                SizedBox(width: 20),
+                Expanded(
+                  child: AspectRatio(
+                    aspectRatio: 1.0, // Proporción de aspecto 1:1 para mantener la altura igual
+                    child: GestureDetector(
+                      onTap: () => _navigateToChart('speed'),
+                      child: Container(
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.blueGrey[700],
+                          borderRadius: BorderRadius.circular(12.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 8,
+                              offset: Offset(0, 4), // cambios en la posición de la sombra
+                            ),
+                          ],
+                          border: Border.all(
+                            color: Colors.blueGrey[300]!,
+                            width: 2.0,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Velocidad',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              '${currentSpeed.toStringAsFixed(1)} km/h',
+                              style: TextStyle(
+                                fontSize: 24, // Tamaño reducido del texto
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                  SizedBox(height: 10),
-                  Text(
-                    '${currentTemperature.toStringAsFixed(1)} °C',
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
             SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: receivedData.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text('Valor recibido: ${receivedData[index]}'),
-                  );
-                },
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChartsScreen(data: receivedData),
-                  ),
-                );
-              },
-              child: Text('Ver Gráfico'),
-            ),
+            // Removido el botón "Ver Gráfico" como se solicitó
           ],
         ),
       ),
