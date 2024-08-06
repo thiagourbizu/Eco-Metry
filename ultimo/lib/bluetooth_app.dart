@@ -85,7 +85,9 @@ class _BluetoothAppState extends State<BluetoothApp> {
     return Scaffold(
       backgroundColor: Colors.blueGrey[900], // Fondo azul oscuro
       appBar: AppBar(
-        title: Text('Bluetooth Scanner'),
+         title: Text(
+          'Bluetooth Scanner',
+          style: TextStyle(color: Colors.white)), 
         backgroundColor: Colors.blueGrey[800], // Color de fondo del AppBar
         actions: [
           _isDiscovering
@@ -96,6 +98,7 @@ class _BluetoothAppState extends State<BluetoothApp> {
                 )
               : IconButton(
                   icon: Icon(Icons.refresh),
+                  color: Colors.white,
                   onPressed: _startDiscovery,
                 ),
         ],
