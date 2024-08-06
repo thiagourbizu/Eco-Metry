@@ -16,9 +16,13 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   BluetoothConnection? connection;
   List<double> temperatureData = [];
   List<double> speedData = [];
+  List<double> voltageData = [];
+  List<double> currentData = [];
   bool isConnecting = true;
   double currentTemperature = 0.0;
   double currentSpeed = 0.0;
+  double currentVoltage = 0.0;
+  double currentCurrent = 0.0;
 
   @override
   void initState() {
@@ -38,17 +42,22 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
       connection!.input!.listen((data) {
         setState(() {
           String valueString = String.fromCharCodes(data).trim();
-          List<String> values = valueString.split(',');
+          List<String> values =
+              valueString.split('-'); // Cambiar a '-' para separar los valores
 
-          if (values.length == 2) {
+          if (values.length == 4) {
             double tempValue = double.tryParse(values[0]) ?? 0.0;
             double speedValue = double.tryParse(values[1]) ?? 0.0;
+            double voltageValue = double.tryParse(values[2]) ?? 0.0;
+            double currentValue = double.tryParse(values[3]) ?? 0.0;
 
             currentTemperature = tempValue;
             currentSpeed = speedValue;
+            currentVoltage = voltageValue;
+            currentCurrent = currentValue;
 
             // Almacenar los últimos 30 datos
-            if (temperatureData.length >= 50) {
+            if (temperatureData.length >= 30) {
               temperatureData.removeAt(0);
             }
             temperatureData.add(currentTemperature);
@@ -57,6 +66,16 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
               speedData.removeAt(0);
             }
             speedData.add(currentSpeed);
+
+            if (voltageData.length >= 30) {
+              voltageData.removeAt(0);
+            }
+            voltageData.add(currentVoltage);
+
+            if (currentData.length >= 30) {
+              currentData.removeAt(0);
+            }
+            currentData.add(currentCurrent);
           }
         });
       }).onDone(() {
@@ -99,9 +118,24 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   }
 
   void _navigateToChart(String chartType) {
-    List<double> dataToPass = chartType == 'temperature'
-        ? List.from(temperatureData)
-        : List.from(speedData);
+    List<double> dataToPass;
+
+    switch (chartType) {
+      case 'temperature':
+        dataToPass = List.from(temperatureData);
+        break;
+      case 'speed':
+        dataToPass = List.from(speedData);
+        break;
+      case 'voltage':
+        dataToPass = List.from(voltageData);
+        break;
+      case 'current':
+        dataToPass = List.from(currentData);
+        break;
+      default:
+        dataToPass = [];
+    }
 
     Navigator.push(
       context,
@@ -228,6 +262,110 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                               '${currentSpeed.toStringAsFixed(1)} km/h',
                               style: const TextStyle(
                                 fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: AspectRatio(
+                    aspectRatio: 1.0,
+                    child: GestureDetector(
+                      onTap: () => _navigateToChart('voltage'),
+                      child: Container(
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.blueGrey[700],
+                          borderRadius: BorderRadius.circular(12.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: Colors.blueGrey[300]!,
+                            width: 2.0,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Voltaje',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              '${currentVoltage.toStringAsFixed(1)} V',
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 20),
+                Expanded(
+                  child: AspectRatio(
+                    aspectRatio: 1.0,
+                    child: GestureDetector(
+                      onTap: () => _navigateToChart('current'),
+                      child: Container(
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.blueGrey[700],
+                          borderRadius: BorderRadius.circular(12.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: Colors.blueGrey[300]!,
+                            width: 2.0,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Amperaje',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              '${currentCurrent.toStringAsFixed(1)} A',
+                              style: TextStyle(
+                                fontSize: 36,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
