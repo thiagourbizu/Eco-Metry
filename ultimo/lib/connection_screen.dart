@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'charts.dart'; // Importar el archivo para el gráfico
+import 'package:ultimo/charts.dart';
+import 'charts.dart'; // Asegúrate de importar el archivo de gráficos
 
 class ConnectionScreen extends StatefulWidget {
   final BluetoothDevice device;
@@ -36,21 +37,20 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
       connection!.input!.listen((data) {
         setState(() {
           String valueString = String.fromCharCodes(data).trim();
-          List<String> values = valueString.split(','); // Suponiendo que los datos vienen separados por comas
+          List<String> values = valueString.split(',');
 
           if (values.length == 2) {
-            double tempValue = double.tryParse(values[0]) ?? 0.0; // Convertir a double
-            double speedValue = double.tryParse(values[1]) ?? 0.0; // Convertir a double
+            double tempValue = double.tryParse(values[0]) ?? 0.0;
+            double speedValue = double.tryParse(values[1]) ?? 0.0;
 
             currentTemperature = tempValue;
             currentSpeed = speedValue;
           }
 
-          // Añadir valores a la lista de datos recibidos para graficar
           if (receivedData.length >= 30) {
-            receivedData.removeAt(0); // Eliminar el dato más antiguo
+            receivedData.removeAt(0);
           }
-          receivedData.add(currentSpeed); // Añadir el valor de velocidad a la lista
+          receivedData.add(currentSpeed);
         });
       }).onDone(() {
         print('Conexión cerrada');
@@ -92,10 +92,17 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   }
 
   void _navigateToChart(String chartType) {
+    List<double> dataToPass = chartType == 'temperature'
+        ? List.generate(receivedData.length, (index) => currentTemperature)
+        : List.from(receivedData);
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChartsScreen(data: receivedData),
+        builder: (context) => ChartsScreen(
+          data: dataToPass,
+          chartType: chartType,
+        ),
       ),
     );
   }
@@ -127,7 +134,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
               children: [
                 Expanded(
                   child: AspectRatio(
-                    aspectRatio: 1.0, // Proporción de aspecto 1:1 para mantener la altura igual
+                    aspectRatio: 1.0,
                     child: GestureDetector(
                       onTap: () => _navigateToChart('temperature'),
                       child: Container(
@@ -140,7 +147,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                               color: Colors.black.withOpacity(0.3),
                               spreadRadius: 2,
                               blurRadius: 8,
-                              offset: Offset(0, 4), // cambios en la posición de la sombra
+                              offset: Offset(0, 4),
                             ),
                           ],
                           border: Border.all(
@@ -177,7 +184,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                 SizedBox(width: 20),
                 Expanded(
                   child: AspectRatio(
-                    aspectRatio: 1.0, // Proporción de aspecto 1:1 para mantener la altura igual
+                    aspectRatio: 1.0,
                     child: GestureDetector(
                       onTap: () => _navigateToChart('speed'),
                       child: Container(
@@ -190,7 +197,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                               color: Colors.black.withOpacity(0.3),
                               spreadRadius: 2,
                               blurRadius: 8,
-                              offset: Offset(0, 4), // cambios en la posición de la sombra
+                              offset: Offset(0, 4),
                             ),
                           ],
                           border: Border.all(
@@ -213,7 +220,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                             Text(
                               '${currentSpeed.toStringAsFixed(1)} km/h',
                               style: TextStyle(
-                                fontSize: 24, // Tamaño reducido del texto
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -227,7 +234,6 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
               ],
             ),
             SizedBox(height: 20),
-            // Removido el botón "Ver Gráfico" como se solicitó
           ],
         ),
       ),
