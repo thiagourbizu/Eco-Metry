@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'charts.dart';
+import 'package:ultimo/charts.dart'; 
+
 
 class ConnectionScreen extends StatefulWidget {
   final BluetoothDevice device;
@@ -164,7 +165,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               'Temperatura',
                               style: TextStyle(
                                 fontSize: 22,
@@ -214,7 +215,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               'Velocidad',
                               style: TextStyle(
                                 fontSize: 22,
@@ -222,10 +223,10 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Text(
                               '${currentSpeed.toStringAsFixed(1)} km/h',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
