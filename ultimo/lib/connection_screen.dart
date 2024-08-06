@@ -13,7 +13,7 @@ class ConnectionScreen extends StatefulWidget {
 
 class _ConnectionScreenState extends State<ConnectionScreen> {
   BluetoothConnection? connection;
-  List<double> receivedData = []; // Cambiar a una lista de double
+  List<double> receivedData = [];
   bool isConnecting = true;
 
   @override
@@ -36,6 +36,9 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
           String valueString = String.fromCharCodes(data).trim();
           double value =
               double.tryParse(valueString) ?? 0.0; // Convertir a double
+          if (receivedData.length >= 30) {
+            receivedData.removeAt(0); // Eliminar el dato más antiguo
+          }
           receivedData.add(value); // Añadir el valor recibido
         });
       }).onDone(() {
@@ -79,6 +82,9 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double currentTemperature =
+        receivedData.isNotEmpty ? receivedData.last : 0.0;
+
     return Scaffold(
       backgroundColor: Colors.blueGrey[900],
       appBar: AppBar(
@@ -87,13 +93,52 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
           'Conectado a ${widget.device.name}',
           style: TextStyle(color: Colors.white),
         ),
-        iconTheme: IconThemeData(color: Colors.white), // Cambia el color de los iconos a blanco
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            if (isConnecting) Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white),)),
+            if (isConnecting)
+              Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            SizedBox(height: 20),
+            Container(
+              padding: EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.blueGrey[700],
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(
+                  color: Colors.blueGrey[300]!,
+                  width: 2.0,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'Temperatura',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    '${currentTemperature.toStringAsFixed(1)} °C',
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
                 itemCount: receivedData.length,
@@ -106,7 +151,6 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                // Navegar al gráfico
                 Navigator.push(
                   context,
                   MaterialPageRoute(
