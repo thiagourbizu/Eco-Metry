@@ -80,15 +80,16 @@ class _BluetoothAppState extends State<BluetoothApp> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blueGrey[900], // Fondo azul oscuro
       appBar: AppBar(
          title: Text(
-          'Bluetooth Scanner',
+          'Eco-Metry',
           style: TextStyle(color: Colors.white)), 
-        backgroundColor: Colors.blueGrey[800], // Color de fondo del AppBar
+        backgroundColor: const Color.fromARGB(255, 78, 161, 202), // Color de fondo del AppBar
         actions: [
           _isDiscovering
               ? Padding(
