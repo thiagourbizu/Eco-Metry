@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:ultimo/charts.dart';
-import 'charts.dart'; // Asegúrate de importar el archivo de gráficos
+import 'charts.dart';
 
 class ConnectionScreen extends StatefulWidget {
   final BluetoothDevice device;
@@ -14,7 +13,8 @@ class ConnectionScreen extends StatefulWidget {
 
 class _ConnectionScreenState extends State<ConnectionScreen> {
   BluetoothConnection? connection;
-  List<double> receivedData = [];
+  List<double> temperatureData = [];
+  List<double> speedData = [];
   bool isConnecting = true;
   double currentTemperature = 0.0;
   double currentSpeed = 0.0;
@@ -45,12 +45,18 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 
             currentTemperature = tempValue;
             currentSpeed = speedValue;
-          }
 
-          if (receivedData.length >= 30) {
-            receivedData.removeAt(0);
+            // Almacenar los últimos 30 datos
+            if (temperatureData.length >= 50) {
+              temperatureData.removeAt(0);
+            }
+            temperatureData.add(currentTemperature);
+
+            if (speedData.length >= 30) {
+              speedData.removeAt(0);
+            }
+            speedData.add(currentSpeed);
           }
-          receivedData.add(currentSpeed);
         });
       }).onDone(() {
         print('Conexión cerrada');
@@ -93,8 +99,8 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 
   void _navigateToChart(String chartType) {
     List<double> dataToPass = chartType == 'temperature'
-        ? List.generate(receivedData.length, (index) => currentTemperature)
-        : List.from(receivedData);
+        ? List.from(temperatureData)
+        : List.from(speedData);
 
     Navigator.push(
       context,
