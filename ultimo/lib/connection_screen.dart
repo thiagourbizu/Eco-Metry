@@ -80,14 +80,20 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blueGrey[900],
       appBar: AppBar(
-        title: Text('Conectado a ${widget.device.name}'),
+        backgroundColor: const Color.fromARGB(255, 78, 161, 202),
+        title: Text(
+          'Conectado a ${widget.device.name}',
+          style: TextStyle(color: Colors.white),
+        ),
+        iconTheme: IconThemeData(color: Colors.white), // Cambia el color de los iconos a blanco
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            if (isConnecting) Center(child: CircularProgressIndicator()),
+            if (isConnecting) Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white),)),
             Expanded(
               child: ListView.builder(
                 itemCount: receivedData.length,
