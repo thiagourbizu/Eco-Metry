@@ -82,8 +82,12 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     double currentTemperature =
         receivedData.isNotEmpty ? receivedData.last : 0.0;
+=======
+    double currentTemperature = receivedData.isNotEmpty ? receivedData.last : 0.0;
+>>>>>>> 6250e280827b5996ed8183a195800bd240e313ea
 
     return Scaffold(
       backgroundColor: Colors.blueGrey[900],
