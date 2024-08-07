@@ -42,8 +42,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
       connection!.input!.listen((data) {
         setState(() {
           String valueString = String.fromCharCodes(data).trim();
-          List<String> values =
-              valueString.split('-'); // Cambiar a '-' para separar los valores
+          List<String> values = valueString.split(',');
 
           if (values.length == 4) {
             double tempValue = double.tryParse(values[0]) ?? 0.0;
@@ -119,7 +118,6 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 
   void _navigateToChart(String chartType) {
     List<double> dataToPass;
-
     switch (chartType) {
       case 'temperature':
         dataToPass = List.from(temperatureData);
