@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:ultimo/charts.dart'; 
-
+import 'data_screen.dart'; // Importar la nueva pantalla de datos
+import 'charts.dart';
 
 class ConnectionScreen extends StatefulWidget {
   final BluetoothDevice device;
@@ -18,6 +18,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   List<double> speedData = [];
   List<double> voltageData = [];
   List<double> currentData = [];
+  List<String> receivedLines = [];
   bool isConnecting = true;
   double currentTemperature = 0.0;
   double currentSpeed = 0.0;
@@ -43,6 +44,12 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
         setState(() {
           String valueString = String.fromCharCodes(data).trim();
           List<String> values = valueString.split(',');
+
+          // Almacenar las últimas 50 líneas recibidas
+          if (receivedLines.length >= 50) {
+            receivedLines.removeAt(0);
+          }
+          receivedLines.add(valueString);
 
           if (values.length == 4) {
             double tempValue = double.tryParse(values[0]) ?? 0.0;
@@ -146,6 +153,15 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     );
   }
 
+  void _navigateToDataScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DataScreen(receivedLines: receivedLines),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,6 +173,12 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.view_list, color: Colors.white),
+            onPressed: _navigateToDataScreen,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -301,7 +323,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               'Voltaje',
                               style: TextStyle(
                                 fontSize: 22,
@@ -309,11 +331,11 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Text(
                               '${currentVoltage.toStringAsFixed(1)} V',
-                              style: TextStyle(
-                                fontSize: 36,
+                              style: const TextStyle(
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -351,7 +373,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               'Amperaje',
                               style: TextStyle(
                                 fontSize: 22,
@@ -359,11 +381,11 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Text(
                               '${currentCurrent.toStringAsFixed(1)} A',
-                              style: TextStyle(
-                                fontSize: 36,
+                              style: const TextStyle(
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -376,7 +398,6 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 20),
           ],
         ),
       ),
