@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'data_screen.dart'; // Importar la nueva pantalla de datos
 import 'charts.dart';
+import 'dart:async';
 
 class ConnectionScreen extends StatefulWidget {
   final BluetoothDevice device;
@@ -24,6 +25,9 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   double currentSpeed = 0.0;
   double currentVoltage = 0.0;
   double currentCurrent = 0.0;
+
+  final StreamController<List<String>> _streamController =
+      StreamController<List<String>>.broadcast();
 
   @override
   void initState() {
@@ -50,6 +54,9 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
             receivedLines.removeAt(0);
           }
           receivedLines.add(valueString);
+
+          // Emitir datos actualizados al stream
+          _streamController.add(receivedLines);
 
           if (values.length == 4) {
             double tempValue = double.tryParse(values[0]) ?? 0.0;
@@ -120,6 +127,8 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   @override
   void dispose() {
     connection?.dispose();
+    _streamController
+        .close(); // Cerrar el StreamController al deshacerse del widget
     super.dispose();
   }
 
@@ -157,7 +166,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DataScreen(receivedLines: receivedLines),
+        builder: (context) => DataScreen(stream: _streamController.stream),
       ),
     );
   }
