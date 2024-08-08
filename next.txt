@@ -1,0 +1,10 @@
+proximas intervenciones
+probar acelerometro en casa con codigo
+conseguir portapilas, probar codigo receptor con todo conectado ( incluido lm7805)
+-comenzar con ese pcb
+-preparar proto que iria en el auto
+-probar todo correctsamente
+-hacer diseño kikad del auto
+
+(en el medio agregar boludeces a la app)
+Jueves, dia 221 del año, 08/08/24 11:23:58
