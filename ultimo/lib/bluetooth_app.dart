@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:async'; // Importación necesaria para StreamSubscription
 import 'connection_screen.dart'; // Importar la pantalla de conexión
 
 class BluetoothApp extends StatefulWidget {
@@ -11,6 +12,7 @@ class BluetoothApp extends StatefulWidget {
 class _BluetoothAppState extends State<BluetoothApp> {
   List<BluetoothDiscoveryResult> _devicesList = [];
   bool _isDiscovering = false;
+  StreamSubscription<BluetoothDiscoveryResult>? _discoveryStream;
 
   @override
   void initState() {
@@ -54,11 +56,12 @@ class _BluetoothAppState extends State<BluetoothApp> {
       _isDiscovering = true;
     });
 
-    FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
+    _discoveryStream =
+        FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
       setState(() {
         _devicesList.add(r);
       });
-    }).onDone(() {
+    }, onDone: () {
       setState(() {
         _isDiscovering = false;
       });
@@ -71,6 +74,17 @@ class _BluetoothAppState extends State<BluetoothApp> {
     });
   }
 
+  void _stopDiscovery() {
+    if (_discoveryStream != null) {
+      _discoveryStream!.cancel(); // Cancelar el stream de descubrimiento
+      setState(() {
+        _isDiscovering = false;
+        _devicesList
+            .clear(); // Limpiar la lista de dispositivos si es necesario
+      });
+    }
+  }
+
   void _connectToDevice(BluetoothDevice device) {
     Navigator.push(
       context,
@@ -80,28 +94,50 @@ class _BluetoothAppState extends State<BluetoothApp> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blueGrey[900], // Fondo azul oscuro
       appBar: AppBar(
-         title: Text(
+        title: Text(
           'Eco-Metry',
-          style: TextStyle(color: Colors.white)), 
-        backgroundColor: const Color.fromARGB(255, 78, 161, 202), // Color de fondo del AppBar
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color.fromARGB(
+            255, 78, 161, 202), // Color de fondo del AppBar
         actions: [
-          _isDiscovering
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          Row(
+            children: [
+              // Cuadrado blanco para detener la búsqueda
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.stop, color: Colors.black),
+                  onPressed: _isDiscovering ? _stopDiscovery : null,
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints(),
+                ),
+              ),
+              // Indicador de carga o botón de actualización
+              if (_isDiscovering)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
                 )
-              : IconButton(
+              else
+                IconButton(
                   icon: Icon(Icons.refresh),
                   color: Colors.white,
                   onPressed: _startDiscovery,
                 ),
+            ],
+          ),
         ],
       ),
       body: _devicesList.isEmpty
@@ -116,14 +152,17 @@ class _BluetoothAppState extends State<BluetoothApp> {
               itemBuilder: (context, index) {
                 BluetoothDiscoveryResult result = _devicesList[index];
                 return ListTile(
-                  tileColor: Colors.blueGrey[900], // Fondo de cada ítem en la lista
+                  tileColor:
+                      Colors.blueGrey[900], // Fondo de cada ítem en la lista
                   title: Text(
                     result.device.name ?? "Unknown Device",
                     style: TextStyle(color: Colors.white), // Texto en blanco
                   ),
                   subtitle: Text(
                     result.device.address.toString(),
-                    style: TextStyle(color: Colors.grey[300]), // Texto secundario en gris claro
+                    style: TextStyle(
+                        color:
+                            Colors.grey[300]), // Texto secundario en gris claro
                   ),
                   trailing: Text(
                     result.rssi.toString(),

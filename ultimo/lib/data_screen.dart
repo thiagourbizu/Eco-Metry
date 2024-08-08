@@ -12,7 +12,8 @@ class DataScreen extends StatelessWidget {
         title: Text('Datos Recibidos'),
         backgroundColor: const Color.fromARGB(255, 78, 161, 202),
       ),
-      body: Padding(
+      body: Container(
+        color: Colors.blueGrey[900], // Fondo total gris oscuro
         padding: const EdgeInsets.all(8.0),
         child: StreamBuilder<List<String>>(
           stream: stream,
@@ -30,15 +31,23 @@ class DataScreen extends StatelessWidget {
             return ListView.builder(
               itemCount: receivedLines.length,
               itemBuilder: (context, index) {
-                return Card(
-                  color: Colors.blueGrey[700],
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      receivedLines[index],
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
+                return Align(
+                  // Alinear a la izquierda
+                  alignment: Alignment.centerLeft,
+                  child: Card(
+                    color: Colors.white, // Fondo blanco para los cuadros
+                    margin: EdgeInsets.symmetric(
+                        vertical: 4.0), // Margen entre cuadros
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.all(8.0), // Padding dentro del Card
+                      child: Text(
+                        receivedLines[index],
+                        style: TextStyle(
+                          color:
+                              Colors.black, // Texto negro para mayor contraste
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),

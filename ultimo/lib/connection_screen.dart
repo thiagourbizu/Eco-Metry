@@ -50,7 +50,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
           List<String> values = valueString.split(',');
 
           // Almacenar las últimas 50 líneas recibidas
-          if (receivedLines.length >= 50) {
+          if (receivedLines.length >= 25) {
             receivedLines.removeAt(0);
           }
           receivedLines.add(valueString);
