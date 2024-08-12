@@ -1,0 +1,7 @@
+para configurar el bluetooth, cargar codigo en blanco con ctrt mas N
+-conectar RX al pin Tx del arduino default
+-conectar Tx al pin Rx del arduino defautl
+
+probar comandos AT
+
+listo!!!
