@@ -3,6 +3,7 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async'; // Importación necesaria para StreamSubscription
 import 'connection_screen.dart'; // Importar la pantalla de conexión
+import 'package:url_launcher/url_launcher.dart';
 
 class BluetoothApp extends StatefulWidget {
   @override
@@ -79,8 +80,7 @@ class _BluetoothAppState extends State<BluetoothApp> {
       _discoveryStream!.cancel(); // Cancelar el stream de descubrimiento
       setState(() {
         _isDiscovering = false;
-        _devicesList
-            .clear(); // Limpiar la lista de dispositivos si es necesario
+        _devicesList.clear(); // Limpiar la lista de dispositivos si es necesario
       });
     }
   }
@@ -94,17 +94,30 @@ class _BluetoothAppState extends State<BluetoothApp> {
     );
   }
 
+  Future<void> _launchURL() async {
+    const String url = 'https://github.com/thiagourbizu/Eco-Metry';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'No se pudo abrir $url';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blueGrey[900], // Fondo azul oscuro
       appBar: AppBar(
-        title: Text(
-          'Eco-Metry',
-          style: TextStyle(color: Colors.white),
+        title: GestureDetector(
+          onTap: () {
+            _launchURL();
+          },
+          child: Text(
+            'Eco-Metry',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
-        backgroundColor: const Color.fromARGB(
-            255, 78, 161, 202), // Color de fondo del AppBar
+        backgroundColor: const Color.fromARGB(255, 78, 161, 202), // Color de fondo del AppBar
         actions: [
           Row(
             children: [
@@ -146,40 +159,56 @@ class _BluetoothAppState extends State<BluetoothApp> {
           ),
         ],
       ),
-      body: _devicesList.isEmpty
-          ? Center(
-              child: Text(
-                "No hay dispositivos encontrados",
-                style: TextStyle(color: Colors.white), // Texto en blanco
-              ),
-            )
-          : ListView.builder(
-              itemCount: _devicesList.length,
-              itemBuilder: (context, index) {
-                BluetoothDiscoveryResult result = _devicesList[index];
-                return ListTile(
-                  tileColor:
-                      Colors.blueGrey[900], // Fondo de cada ítem en la lista
-                  title: Text(
-                    result.device.name ?? "Unknown Device",
-                    style: TextStyle(color: Colors.white), // Texto en blanco
+      body: Column(
+        children: [
+          Expanded(
+            child: _devicesList.isEmpty
+                ? Center(
+                    child: Text(
+                      "No hay dispositivos encontrados",
+                      style: TextStyle(color: Colors.white), // Texto en blanco
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _devicesList.length,
+                    itemBuilder: (context, index) {
+                      BluetoothDiscoveryResult result = _devicesList[index];
+                      return ListTile(
+                        tileColor: Colors.blueGrey[900], // Fondo de cada ítem en la lista
+                        title: Text(
+                          result.device.name ?? "Unknown Device",
+                          style: TextStyle(color: Colors.white), // Texto en blanco
+                        ),
+                        subtitle: Text(
+                          result.device.address.toString(),
+                          style: TextStyle(color: Colors.grey[300]), // Texto secundario en gris claro
+                        ),
+                        trailing: Text(
+                          result.rssi.toString(),
+                          style: TextStyle(color: Colors.white), // Texto en blanco
+                        ),
+                        onTap: () {
+                          _connectToDevice(result.device);
+                        },
+                      );
+                    },
                   ),
-                  subtitle: Text(
-                    result.device.address.toString(),
-                    style: TextStyle(
-                        color:
-                            Colors.grey[300]), // Texto secundario en gris claro
-                  ),
-                  trailing: Text(
-                    result.rssi.toString(),
-                    style: TextStyle(color: Colors.white), // Texto en blanco
-                  ),
-                  onTap: () {
-                    _connectToDevice(result.device);
-                  },
-                );
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () {
+                _launchURL(); // Abre el enlace al ser presionado
               },
+              child: Text("Abrir GitHub"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueGrey[700], // Color de fondo
+                foregroundColor: Colors.white, // Color del texto
+              ),
             ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -127,8 +127,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   @override
   void dispose() {
     connection?.dispose();
-    _streamController
-        .close(); // Cerrar el StreamController al deshacerse del widget
+    _streamController.close(); // Cerrar el StreamController al deshacerse del widget
     super.dispose();
   }
 
@@ -178,110 +177,111 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     if (orientation == Orientation.landscape) {
       // Modo horizontal
       return Scaffold(
-          backgroundColor: Colors.blueGrey[900],
-          appBar: AppBar(
-            backgroundColor: const Color.fromARGB(255, 78, 161, 202),
-            title: Text(
-              'Eco-Metry',
-              style: TextStyle(color: Colors.white),
-            ),
-            iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: Colors.blueGrey[900],
+        appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 78, 161, 202),
+          title: Text(
+            'Eco-Metry',
+            style: TextStyle(color: Colors.white),
           ),
-          body: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: Colors.blueGrey[700],
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.blueGrey[300]!,
-                      width: 2.0,
-                    ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        body: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey[700],
+                  borderRadius: BorderRadius.circular(12.0),
+                  border: Border.all(
+                    color: Colors.blueGrey[300]!,
+                    width: 2.0,
                   ),
-                  child: Center(
-                    child: Text(
-                      '${currentTemperature.toStringAsFixed(1)} °C',
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                ),
+                child: Center(
+                  child: Text(
+                    '${currentTemperature.toStringAsFixed(1)} °C',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-                Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: Colors.blueGrey[700],
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.blueGrey[300]!,
-                      width: 2.0,
-                    ),
+              ),
+              Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey[700],
+                  borderRadius: BorderRadius.circular(12.0),
+                  border: Border.all(
+                    color: Colors.blueGrey[300]!,
+                    width: 2.0,
                   ),
-                  child: Center(
-                    child: Text(
-                      '${currentSpeed.toStringAsFixed(1)} km/h',
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                ),
+                child: Center(
+                  child: Text(
+                    '${currentSpeed.toStringAsFixed(1)} km/h',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-                Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: Colors.blueGrey[700],
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.blueGrey[300]!,
-                      width: 2.0,
-                    ),
+              ),
+              Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey[700],
+                  borderRadius: BorderRadius.circular(12.0),
+                  border: Border.all(
+                    color: Colors.blueGrey[300]!,
+                    width: 2.0,
                   ),
-                  child: Center(
-                    child: Text(
-                     '${currentVoltage.toStringAsFixed(1)} V', // Puedes cambiar esto por la velocidad deseada
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                ),
+                child: Center(
+                  child: Text(
+                    '${currentVoltage.toStringAsFixed(1)} V',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-                Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: Colors.blueGrey[700],
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.blueGrey[300]!,
-                      width: 2.0,
-                    ),
+              ),
+              Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey[700],
+                  borderRadius: BorderRadius.circular(12.0),
+                  border: Border.all(
+                    color: Colors.blueGrey[300]!,
+                    width: 2.0,
                   ),
-                  child: Center(
-                    child: Text(
-                      '${currentCurrent.toStringAsFixed(1)} A', // Puedes cambiar esto por la velocidad deseada
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                ),
+                child: Center(
+                  child: Text(
+                    '${currentCurrent.toStringAsFixed(1)} A',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-              ],
-            ),
-          ));
+              ),
+            ],
+          ),
+        ),
+      );
     } else {
       // Modo vertical
       return Scaffold(
@@ -323,37 +323,36 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                           decoration: BoxDecoration(
                             color: Colors.blueGrey[700],
                             borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: Colors.blueGrey[300]!, // Cambiado a Colors.blueGrey[700]
+                              width: 2.0,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.3),
                                 spreadRadius: 2,
                                 blurRadius: 8,
-                                offset: Offset(0, 4),
+                                offset: Offset(0, 3),
                               ),
                             ],
-                            border: Border.all(
-                              color: Colors.blueGrey[300]!,
-                              width: 2.0,
-                            ),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text(
+                              Text(
                                 'Temperatura',
                                 style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
                                   color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                               SizedBox(height: 10),
                               Text(
                                 '${currentTemperature.toStringAsFixed(1)} °C',
                                 style: TextStyle(
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.bold,
                                   color: Colors.white,
+                                  fontSize: 32,
                                 ),
                               ),
                             ],
@@ -362,7 +361,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 20),
+                  SizedBox(width: 16),
                   Expanded(
                     child: AspectRatio(
                       aspectRatio: 1.0,
@@ -373,37 +372,36 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                           decoration: BoxDecoration(
                             color: Colors.blueGrey[700],
                             borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: Colors.blueGrey[300]!, // Cambiado a Colors.blueGrey[700]
+                              width: 2.0,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.3),
                                 spreadRadius: 2,
                                 blurRadius: 8,
-                                offset: Offset(0, 4),
+                                offset: Offset(0, 3),
                               ),
                             ],
-                            border: Border.all(
-                              color: Colors.blueGrey[300]!,
-                              width: 2.0,
-                            ),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text(
+                              Text(
                                 'Velocidad',
                                 style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
                                   color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                '${currentSpeed.toStringAsFixed(1)} km/h',
-                                style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                '${currentSpeed.toStringAsFixed(1)} km/h',
+                                style: TextStyle(
                                   color: Colors.white,
+                                  fontSize: 32,
                                 ),
                               ),
                             ],
@@ -414,7 +412,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -427,37 +425,36 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                           decoration: BoxDecoration(
                             color: Colors.blueGrey[700],
                             borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: Colors.blueGrey[300]!, // Cambiado a Colors.blueGrey[700]
+                              width: 2.0,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.3),
                                 spreadRadius: 2,
                                 blurRadius: 8,
-                                offset: Offset(0, 4),
+                                offset: Offset(0, 3),
                               ),
                             ],
-                            border: Border.all(
-                              color: Colors.blueGrey[300]!,
-                              width: 2.0,
-                            ),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text(
-                                'Tensión',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
                               Text(
-                                '${currentVoltage.toStringAsFixed(1)} V',
-                                style: const TextStyle(
+                                'Voltaje',
+                                style: TextStyle(
+                                  color: Colors.white,
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                '${currentVoltage.toStringAsFixed(1)} V',
+                                style: TextStyle(
                                   color: Colors.white,
+                                  fontSize: 32,
                                 ),
                               ),
                             ],
@@ -466,7 +463,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 20),
+                  SizedBox(width: 16),
                   Expanded(
                     child: AspectRatio(
                       aspectRatio: 1.0,
@@ -477,37 +474,36 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                           decoration: BoxDecoration(
                             color: Colors.blueGrey[700],
                             borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: Colors.blueGrey[300]!, // Cambiado a Colors.blueGrey[700]
+                              width: 2.0,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.3),
                                 spreadRadius: 2,
                                 blurRadius: 8,
-                                offset: Offset(0, 4),
+                                offset: Offset(0, 3),
                               ),
                             ],
-                            border: Border.all(
-                              color: Colors.blueGrey[300]!,
-                              width: 2.0,
-                            ),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text(
+                              Text(
                                 'Corriente',
                                 style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
                                   color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                '${currentCurrent.toStringAsFixed(1)} A',
-                                style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                '${currentCurrent.toStringAsFixed(1)} A',
+                                style: TextStyle(
                                   color: Colors.white,
+                                  fontSize: 32,
                                 ),
                               ),
                             ],

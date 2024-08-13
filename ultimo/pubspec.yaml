@@ -33,6 +33,7 @@ dependencies:
   flutter_bluetooth_serial: ^0.4.0
   syncfusion_flutter_charts: ^20.1.56
   permission_handler: ^10.0.0
+  url_launcher: ^6.0.20
 
 
 

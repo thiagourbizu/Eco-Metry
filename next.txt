@@ -8,3 +8,7 @@ conseguir portapilas, probar codigo receptor con todo conectado ( incluido lm780
 
 (en el medio agregar boludeces a la app)
 Jueves, dia 221 del año, 08/08/24 11:23:58
+
+agregar boton github y boton en los logs para seleccionar que ver
+a parte de esto
+agregar detector de fallas una vez configutado con los logs
