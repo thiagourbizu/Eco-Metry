@@ -3,7 +3,7 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async'; // Importación necesaria para StreamSubscription
 import 'connection_screen.dart'; // Importar la pantalla de conexión
-import 'package:url_launcher/url_launcher.dart';
+import 'package:external_app_launcher/external_app_launcher.dart'; // Importar external_app_launcher para abrir enlaces
 
 class BluetoothApp extends StatefulWidget {
   @override
@@ -94,12 +94,19 @@ class _BluetoothAppState extends State<BluetoothApp> {
     );
   }
 
-  Future<void> _launchURL() async {
-    const String url = 'https://github.com/thiagourbizu/Eco-Metry';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'No se pudo abrir $url';
+  Future<void> _launchYouTube() async {
+    const String url = 'https://www.youtube.com/watch?v=urnrIW-eaX4';
+    try {
+      await LaunchApp.openApp(
+        androidPackageName: 'com.google.android.youtube',
+        iosUrlScheme: 'youtube://',
+        appStoreLink: url,
+        openStore: false,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("No se pudo abrir YouTube")),
+      );
     }
   }
 
@@ -110,14 +117,15 @@ class _BluetoothAppState extends State<BluetoothApp> {
       appBar: AppBar(
         title: GestureDetector(
           onTap: () {
-            _launchURL();
+            _launchYouTube(); // Abrir enlace de YouTube al tocar el título
           },
           child: Text(
             'Eco-Metry',
             style: TextStyle(color: Colors.white),
           ),
         ),
-        backgroundColor: const Color.fromARGB(255, 78, 161, 202), // Color de fondo del AppBar
+        backgroundColor: const Color.fromARGB(
+            255, 78, 161, 202), // Color de fondo del AppBar
         actions: [
           Row(
             children: [
@@ -197,10 +205,8 @@ class _BluetoothAppState extends State<BluetoothApp> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
-              onPressed: () {
-                _launchURL(); // Abre el enlace al ser presionado
-              },
-              child: Text("Abrir GitHub"),
+              onPressed: _launchYouTube, // Abre el enlace de YouTube
+              child: Text("Abrir Github"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueGrey[700], // Color de fondo
                 foregroundColor: Colors.white, // Color del texto
