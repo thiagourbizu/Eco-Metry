@@ -9,8 +9,15 @@ class DataScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Datos Recibidos'),
+        title: const Text(
+          'Datos Recibidos',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: const Color.fromARGB(255, 78, 161, 202),
+        iconTheme: IconThemeData(
+          color:
+              Colors.white, // Cambia el color aquí para la flecha hacia atrás
+        ),
       ),
       body: Container(
         color: Colors.blueGrey[900], // Fondo total gris oscuro
@@ -19,7 +26,9 @@ class DataScreen extends StatelessWidget {
           stream: stream,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return Center(
+                  child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white)));
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

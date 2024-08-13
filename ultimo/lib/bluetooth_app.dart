@@ -110,25 +110,31 @@ class _BluetoothAppState extends State<BluetoothApp> {
             children: [
               // Cuadrado blanco para detener la búsqueda
               Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
                 child: IconButton(
-                  icon: Icon(Icons.stop, color: Colors.black),
-                  onPressed: _isDiscovering ? _stopDiscovery : null,
+                  icon: Icon(_isDiscovering ? Icons.stop : Icons.play_arrow,
+                      color: Colors.white),
+                  onPressed: () {
+                    if (_isDiscovering) {
+                      _stopDiscovery();
+                    } else {
+                      _startDiscovery();
+                    }
+                  },
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(),
                 ),
               ),
               // Indicador de carga o botón de actualización
               if (_isDiscovering)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: SizedBox(
+                    width: 23.0, // Ajusta el tamaño según tus necesidades
+                    height: 23.0, // Ajusta el tamaño según tus necesidades
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
                 )
               else
                 IconButton(
