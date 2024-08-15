@@ -1,4 +1,4 @@
-proximas intervenciones
+﻿proximas intervenciones
 probar acelerometro en casa con codigo
 conseguir portapilas, probar codigo receptor con todo conectado ( incluido lm7805)
 -comenzar con ese pcb
@@ -12,3 +12,23 @@ Jueves, dia 221 del año, 08/08/24 11:23:58
 agregar boton github y boton en los logs para seleccionar que ver
 a parte de esto
 agregar detector de fallas una vez configutado con los logs
+
+proximas intervenciones v0.2 ---- ✘✔❔ (15/08)
+-acelerometro working ✔
+casa (findesemana)
+-medira temperatura ❔ (probar)
+-terminar speedometer(casi finiquitado)❔
+lunes 19/08 
+(mediodia)
+-comprar 2 portapilas y 2 LM7805 ❔
+(tarde)
+-probar proto receptor ❔ 
+-amplificar shunt y lograr medir ❔
+
+if (it´s working)
+	mezclar todos los codigos de transmisor y probar
+else
+	seguir porbando hasta hacerlo andar la mierda esa
+
+si todo sale bien el martes/miercoles transmisor working!!!
+hasta la semana que viene amigo!!
