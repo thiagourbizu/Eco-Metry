@@ -94,6 +94,25 @@ class _BluetoothAppState extends State<BluetoothApp> {
     );
   }
 
+  // Método para simular conexión a un dispositivo inexistente
+  void _connectToFakeDevice() {
+    // Crea un dispositivo ficticio
+    BluetoothDevice fakeDevice = BluetoothDevice(
+      name: "Dispositivo Inexistente",
+      address: "00:00:00:00:00:00",
+      type: BluetoothDeviceType.unknown,
+      bondState: BluetoothBondState.bonded,
+    );
+
+    // Navega a la pantalla de conexión con el dispositivo ficticio
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ConnectionScreen(device: fakeDevice),
+      ),
+    );
+  }
+
   Future<void> _launchYouTube() async {
     const String url = 'https://www.youtube.com/watch?v=urnrIW-eaX4';
     try {
@@ -201,6 +220,17 @@ class _BluetoothAppState extends State<BluetoothApp> {
                       );
                     },
                   ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: _connectToFakeDevice, // Simula conexión a un dispositivo inexistente
+              child: Text("Conectar a dispositivo inexistente"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueGrey[700], // Color de fondo
+                foregroundColor: Colors.white, // Color del texto
+              ),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
