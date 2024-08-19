@@ -1,255 +1,103 @@
-#include <SoftwareSerial.h>
-#include "MPU6050.h"
-#include "Wire.h"
-#include "I2Cdev.h"
+/* Heltec Automation Receive communication test example
+ *
+ * Function:
+ * 1. Receive the same frequency band lora signal program
+ * a
+ * 
+ * this project also realess in GitHub:
+ * https://github.com/HelTecAutomation/ASR650x-Arduino
+ * */
 
-// MPU6050
-const float CONST_16G = 2048;
-const float CONST_2000 = 16.4;
-const float CONST_G = 9.81;
-const float RADIANS_TO_DEGREES = 180 / 3.14159;
-const float ALPHA = 0.96;
-const float KMPH = 3.6;
+#include "LoRaWan_APP.h"
+#include "Arduino.h"
+#include <HardwareSerial.h>
 
-MPU6050 accelgyro;
+// NO TOCAR NUNCA EN LA VIDA
+#define RX_PIN 1
+#define TX_PIN 2
 
-unsigned long last_read_time;
-int16_t ax, ay, az, gx, gy, gz;
-int16_t gyro_angle_x_l, gyro_angle_y_l;
-int16_t angle_x_l, angle_y_l;
-int16_t ax_offset, ay_offset, az_offset, gx_offset, gy_offset, gz_offset;
-int16_t temperature;
+HardwareSerial BTserial(1);  // UART1 Heltec AB02
 
-// Configuración del módulo Bluetooth
-int bluRX = 3;
-int bluTX = 2;
+/*
+ * set LoraWan_RGB to 1, the RGB active in loraWan
+ * RGB red means sending;
+ * RGB green means received done;
+ */
+#ifndef LoraWan_RGB
+#define LoraWan_RGB 0
+#endif
 
-SoftwareSerial BTSerial(bluRX, bluTX); // RX, TX
+#define RF_FREQUENCY 915000000 // Hz
 
+#define TX_OUTPUT_POWER 14 // dBm
 
-// Pin del sensor de temperatura LM35
-const int sensorPin = A5;
-float temperatureC;
+#define LORA_BANDWIDTH 0 // [0: 125 kHz,
+                         //  1: 250 kHz,
+                         //  2: 500 kHz,
+                         //  3: Reserved]
+#define LORA_SPREADING_FACTOR 7 // [SF7..SF12]
+#define LORA_CODINGRATE 1       // [1: 4/5,
+                                //  2: 4/6,
+                                //  3: 4/7,
+                                //  4: 4/8]
+#define LORA_PREAMBLE_LENGTH 8  // Same for Tx and Rx
+#define LORA_SYMBOL_TIMEOUT 0   // Symbols
+#define LORA_FIX_LENGTH_PAYLOAD_ON false
+#define LORA_IQ_INVERSION_ON false
 
-void setup() }
-{
-  Wire.begin();
-  // Inicia la comunicación serie con el PC
-  Serial.begin(115200);
-  // Inicia BT
-  BTSerial.begin(115200); // Velocidad de comunicación para datos normales
-  
-  
-  // initialize device
-  Serial.println("Initializing I2C devices...");
-  accelgyro.initialize();
+#define RX_TIMEOUT_VALUE 1000
+#define BUFFER_SIZE 30 // Define the payload size here
 
-  Serial.println("Testing device connections...");
-  Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
+char txpacket[BUFFER_SIZE];
+char rxpacket[BUFFER_SIZE];
 
-  accelgyro.setFullScaleAccelRange(0x03);
-  accelgyro.setFullScaleGyroRange(0x03);
+static RadioEvents_t RadioEvents;
 
-  calibrate_sensors();
-  set_last_time(millis());
+int16_t txNumber;
+int16_t rssi, rxSize;
+
+bool lora_idle = true;
+
+String cadena = "";  // Variable para almacenar el paquete recibido
+unsigned long previousMillis = 0; // Variable para controlar el tiempo
+
+void setup() {
+    Serial.begin(115200);
+    BTserial.begin(115200);  // Inicializar comunicación serial Bluetooth
+
+    txNumber = 0;
+    rssi = 0;
+
+    RadioEvents.RxDone = OnRxDone;
+    Radio.Init(&RadioEvents);
+    Radio.SetChannel(RF_FREQUENCY);
+
+    Radio.SetRxConfig(MODEM_LORA, LORA_BANDWIDTH, LORA_SPREADING_FACTOR,
+                      LORA_CODINGRATE, 0, LORA_PREAMBLE_LENGTH,
+                      LORA_SYMBOL_TIMEOUT, LORA_FIX_LENGTH_PAYLOAD_ON,
+                      0, true, 0, 0, LORA_IQ_INVERSION_ON, true);
 }
-
-void loop() 
-{
-  unsigned long t_now = millis();
-  float dt = get_delta_time(t_now);
-  accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-
-  float ax_p = (ax - ax_offset) / CONST_16G;
-  float ay_p = (ay - ay_offset) / CONST_16G;
-  float az_p = (az / CONST_16G);
-
-  float accel_angle_y = atan(-1 * ax_p / sqrt(pow(ay_p, 2) + pow(az_p, 2))) * RADIANS_TO_DEGREES;
-  float accel_angle_x = atan(ay_p / sqrt(pow(ax_p, 2) + pow(az_p, 2))) * RADIANS_TO_DEGREES;
-
-  float gx_p = (gx - gx_offset) / CONST_2000;
-  float gy_p = (gy - gy_offset) / CONST_2000;
-  float gz_p = (gz - gz_offset) / CONST_2000;
-
-  float gyro_angle_x = gx_p * dt + get_last_angle_x();
-  float gyro_angle_y = gy_p * dt + get_last_angle_y();
-
-  float angle_x = ALPHA * gyro_angle_x + (1.0 - ALPHA) * accel_angle_x;
-  float angle_y = ALPHA * gyro_angle_y + (1.0 - ALPHA) * accel_angle_y;
-
-  float vel_x = (ax_p * dt * CONST_G);
-  float vel_y = (ay_p * dt * CONST_G);
-  float vel = sqrt(pow(vel_x, 2) + pow(vel_y, 2)) * KMPH;
-
-  temperature = (accelgyro.getTemperature() + 12412) / 340;
-
-
-  
-  // Leer el valor del sensor de temperatura
-  int sensorValue = analogRead(sensorPin); // Lee el valor del sensor (0-1023)
-  temperatureC = sensorValue * (5.0 / 1023.0) * 100.0; // Convierte el valor a grados Celsius
-  int hola = 100;
-  int velocidad = 100;
-  int voltaje = 1;
-  int amperaje = 2;
-  //int roundedTempC = round(temperatureC);
-
-  // También mostrar la temperatura en el monitor serial
- // Serial.println(temperatureC,hola);
-  String cadena = String(temperatureC) + "," + String(velocidad) + "," +  String(voltaje) + "," + String(amperaje);
-  // Enviar el dato leído a través del módulo Bluetooth
-  Serial.println(cadena);
-  
-  Serial.print("  vel: ");
-  Serial.print(vel, 4);
-  Serial.print("km/hr");
-  Serial.print("  pitch: ");
-  Serial.print(angle_x);
-  Serial.print("deg");
-  Serial.print("  roll: ");
-  Serial.print(angle_y);
-  Serial.print("deg");
-  Serial.print("  temp: ");
-  Serial.println(temperature);
-  Serial.print(" C");
-
-  set_last_time(t_now);
-
-  set_last_gyro_angle_x(gyro_angle_x);
-  set_last_gyro_angle_y(gyro_angle_y);
-
-  set_last_angle_x(angle_x);
-  set_last_angle_y(angle_y);
-
-  delay(500);
-  BTSerial.print(cadena);
-  delay(1000);
-  
-}
-
-
 
 void loop() {
-  
+    if (lora_idle) {
+        turnOffRGB();
+        lora_idle = false;
+        Serial.println("into RX mode");
+        Radio.Rx(0);
+    }
 
-  
+    Serial.println(cadena);
+    BTserial.print(cadena);  // Imprime la cadena recibida por Bluetooth
 }
 
-void calibrate_sensors() {
-  int                   num_readings = 100;
-  float                 x_accel = 0;
-  float                 y_accel = 0;
-  float                 z_accel = 0;
-  float                 x_gyro = 0;
-  float                 y_gyro = 0;
-  float                 z_gyro = 0;
-
-  Serial.println("Starting Calibration");
-
-  // Discard the first set of values read from the IMU
-  accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-
-  // Read and average the raw values from the IMU
-  for (int i = 0; i < num_readings; i++) {
-    accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-
-    Serial.print(i);
-    Serial.print("-CALIBRATION: ");
-    Serial.print((ax / CONST_16G));
-    Serial.print(",");
-    Serial.print((ay / CONST_16G));
-    Serial.print(",");
-    Serial.print((az / CONST_16G));
-    Serial.print(",");
-    Serial.print(gx / CONST_2000);
-    Serial.print(",");
-    Serial.print(gy / CONST_2000);
-    Serial.print(",");
-    Serial.println(gz / CONST_2000);
-    
-    x_accel += ax;
-    y_accel += ay;
-    z_accel += az;
-    x_gyro += gx;
-    y_gyro += gy;
-    z_gyro += gz;
-    delay(10);
-  }
-  x_accel /= num_readings;
-  y_accel /= num_readings;
-  z_accel /= num_readings;
-  x_gyro /= num_readings;
-  y_gyro /= num_readings;
-  z_gyro /= num_readings;
-
-  // Store the raw calibration values globally
-  ax_offset = x_accel;
-  ay_offset = y_accel;
-  az_offset = z_accel;
-  gx_offset = x_gyro;
-  gy_offset = y_gyro;
-  gz_offset = z_gyro;
-
-  Serial.print("Offsets: ");
-  Serial.print(ax_offset);
-  Serial.print(", ");
-  Serial.print(ay_offset);
-  Serial.print(", ");
-  Serial.print(az_offset);
-  Serial.print(", ");
-  Serial.print(gx_offset);
-  Serial.print(", ");
-  Serial.print(gy_offset);
-  Serial.print(", ");
-  Serial.println(gz_offset);
-
-  Serial.println("Finishing Calibration");
-}
-
-inline unsigned long get_last_time() {
-  return last_read_time;
-}
-
-inline void set_last_time(unsigned long _time) {
-  last_read_time = _time;
-}
-
-inline float get_delta_time(unsigned long t_now) {
-  return (t_now - get_last_time()) / 1000.0;
-}
-
-inline int16_t get_last_gyro_angle_x() {
-  return gyro_angle_x_l;
-}
-
-inline void set_last_gyro_angle_x(int16_t _gyro_angle_x) {
-  gyro_angle_x_l = _gyro_angle_x;
-}
-
-inline int16_t get_last_gyro_angle_y() {
-  return gyro_angle_y_l;
-}
-
-inline void set_last_gyro_angle_y(int16_t _gyro_angle_y) {
-  gyro_angle_y_l = _gyro_angle_y;
-}
-
-inline int16_t get_last_angle_x() {
-  return angle_x_l;
-}
-
-inline void set_last_angle_x(int16_t _ang_x) {
-  angle_x_l = _ang_x;
-}
-
-inline int16_t get_last_angle_y() {
-  return angle_y_l;
-}
-
-inline void set_last_angle_y(int16_t _ang_y) {
-  angle_y_l = _ang_y;
-}
-
-inline float get_accel_xy(float ax_p, float ay_p) {
-  return sqrt(pow(ax_p, 2) + pow(ay_p, 2));
+void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
+    rssi = rssi;
+    rxSize = size;
+    memcpy(rxpacket, payload, size);
+    rxpacket[size] = '\0';
+    turnOnRGB(COLOR_RECEIVED, 0);
+    Radio.Sleep();
+    Serial.printf("\r\nreceived packet \"%s\" with rssi %d , length %d\r\n", rxpacket, rssi, rxSize);
+    cadena = String(rxpacket);  // Almacena el paquete recibido en la variable cadena
+    lora_idle = true;
 }
