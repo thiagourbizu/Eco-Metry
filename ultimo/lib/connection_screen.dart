@@ -175,109 +175,118 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   Widget build(BuildContext context) {
     final orientation = MediaQuery.of(context).orientation;
 
-  if (orientation == Orientation.landscape) {
-  // Modo horizontal
-  return Scaffold(
-    backgroundColor: Colors.blueGrey[900],
-    appBar: AppBar(
-      backgroundColor: const Color.fromARGB(255, 78, 161, 202),
-      title: Text(
-        'Eco-Metry',
-        style: TextStyle(color: Colors.white),
-      ),
-      iconTheme: IconThemeData(color: Colors.white),
-    ),
-    body: Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.blueGrey[700],
-              borderRadius: BorderRadius.circular(12.0),
-              border: Border.all(
-                color: Colors.blueGrey[300]!,
-                width: 2.0,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                '${currentTemperature.toStringAsFixed(1)} °C',
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+    if (orientation == Orientation.landscape) {
+      // Modo horizontal
+      return Scaffold(
+        backgroundColor: Colors.blueGrey[900],
+        appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 78, 161, 202),
+          title: Text(
+            'Eco-Metry',
+            style: TextStyle(color: Colors.white),
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        body: Center(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                Container(
+                  width: 150,
+                  height: 150,
+                  child: KdGaugeView(
+                    minSpeed: 0,
+                    maxSpeed: 180,
+                    speed: currentSpeed,
+                    animate: true,
+                    duration: Duration(seconds: 1),
+                    alertSpeedArray: [60, 120, 160],
+                    alertColorArray: [Colors.green, Colors.orange, Colors.red],
+                    unitOfMeasurement: "km/h",
+                    gaugeWidth: 15,
+                    fractionDigits: 1,
+                  ),
                 ),
-              ),
-            ),
-          ),
-          Container(
-            width: 200,
-            height: 200,
-            child: KdGaugeView(
-              minSpeed: 0,
-              maxSpeed: 180,
-              speed: currentSpeed,
-              animate: true,
-              duration: Duration(seconds: 1),
-              alertSpeedArray: [60, 120, 160],
-              alertColorArray: [Colors.green, Colors.orange, Colors.red],
-              unitOfMeasurement: "km/h",
-              gaugeWidth: 20,
-              fractionDigits: 1,
-            ),
-          ),
-          Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.blueGrey[700],
-              borderRadius: BorderRadius.circular(12.0),
-              border: Border.all(
-                color: Colors.blueGrey[300]!,
-                width: 2.0,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                '${currentVoltage.toStringAsFixed(1)} V',
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                SizedBox(width: 16),
+                Column(
+                  children: [
+                    Container(
+                      width: 150,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        color: Colors.blueGrey[700],
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(
+                          color: Colors.blueGrey[300]!,
+                          width: 2.0,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${currentTemperature.toStringAsFixed(1)} °C',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Container(
+                      width: 150,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        color: Colors.blueGrey[700],
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(
+                          color: Colors.blueGrey[300]!,
+                          width: 2.0,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${currentVoltage.toStringAsFixed(1)} V',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Container(
+                      width: 150,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        color: Colors.blueGrey[700],
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(
+                          color: Colors.blueGrey[300]!,
+                          width: 2.0,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${currentCurrent.toStringAsFixed(1)} A',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+              ],
             ),
           ),
-          Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.blueGrey[700],
-              borderRadius: BorderRadius.circular(12.0),
-              border: Border.all(
-                color: Colors.blueGrey[300]!,
-                width: 2.0,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                '${currentCurrent.toStringAsFixed(1)} A',
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-} else {
+        ),
+      );
+    } else {
       // Modo vertical
       return Scaffold(
         backgroundColor: Colors.blueGrey[900],
