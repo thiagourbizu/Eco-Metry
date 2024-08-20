@@ -1,7 +1,7 @@
 #include "Arduino.h"
 
 // Configuración del puerto serie
-#define BT_BAUD_RATE 9600 // Velocidad de comunicación con HC-05
+#define BT_BAUD_RATE 115200 // Velocidad de comunicación con HC-05
 #define DELAY_MS 100     // Retraso entre transmisiones (milisegundos)
 
 HardwareSerial BTserial(1); // UART1 para el HC-05
@@ -34,4 +34,3 @@ void loop() {
     // Esperar un segundo antes de enviar el siguiente paquete
   delay(DELAY_MS);
 }
-
