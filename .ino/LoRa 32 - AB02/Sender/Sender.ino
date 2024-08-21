@@ -66,15 +66,15 @@ void setup() {
 
 void loop() {
     float pote = analogRead(1);  // Simulación de lectura analógica
-    float value2 = 123.45;       // Ejemplo de segundo valor
-    float value3 = 678.90;       // Ejemplo de tercer valor
-    float value4 = 234.56;       // Ejemplo de cuarto valor
+    float value2 = 10;       // Ejemplo de segundo valor
+    float value3 = 1;       // Ejemplo de tercer valor
+    float value4 = 3;       // Ejemplo de cuarto valor
 
     if (lora_idle) {
         txNumber += 1;
-        delay(100);
+        delay(1000);
         // Formatea la cadena con 4 valores
-        sprintf(txpacket, "Values: %.2f, %.2f, %.2f, %.2f", pote, value2, value3, value4);
+        sprintf(txpacket,"%.2f,%.2f,%.2f,%.2f", pote, value2, value3, value4);
         Serial.printf("\r\nsending packet \"%s\" , length %d\r\n", txpacket, strlen(txpacket));
         turnOnRGB(COLOR_SEND, 0); // Cambia el color del RGB
         Radio.Send((uint8_t *)txpacket, strlen(txpacket)); // Envía el paquete
