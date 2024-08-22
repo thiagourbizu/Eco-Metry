@@ -1,0 +1,472 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'data_screen.dart'; // Importar la nueva pantalla de datos
+import 'charts.dart';
+import 'dart:async';
+import 'package:kdgaugeview/kdgaugeview.dart';
+
+class ConnectionScreen extends StatefulWidget {
+  final BluetoothDevice device;
+
+  ConnectionScreen({required this.device});
+
+  @override
+  _ConnectionScreenState createState() => _ConnectionScreenState();
+}
+
+class _ConnectionScreenState extends State<ConnectionScreen> {
+  BluetoothConnection? connection;
+  List<double> temperatureData = [];
+  List<double> speedData = [];
+  List<double> voltageData = [];
+  List<double> currentData = [];
+  List<String> receivedLines = [];
+  bool isConnecting = true;
+  double currentTemperature = 0.0;
+  double currentSpeed = 0.0;
+  double currentVoltage = 0.0;
+  double currentCurrent = 0.0;
+
+  final StreamController<List<String>> _streamController =
+      StreamController<List<String>>.broadcast();
+
+  // Usar ValueNotifier para el velocímetro
+  ValueNotifier<double> speedNotifier = ValueNotifier<double>(0.0);
+
+  @override
+  void initState() {
+    super.initState();
+    _connectToDevice();
+  }
+
+  void _connectToDevice() async {
+    try {
+      connection = await BluetoothConnection.toAddress(widget.device.address);
+      print('Conectado a ${widget.device.name}');
+      setState(() {
+        isConnecting = false;
+      });
+
+      // Escuchar datos
+      connection!.input!.listen((data) {
+        String valueString = String.fromCharCodes(data).trim();
+        List<String> values = valueString.split(',');
+
+        // Depuración
+        print('Datos recibidos: $valueString');
+
+        setState(() {
+          if (receivedLines.length >= 25) {
+            receivedLines.removeAt(0);
+          }
+          receivedLines.add(valueString);
+
+          _streamController.add(receivedLines);
+
+          if (values.length == 4) {
+            double tempValue = double.tryParse(values[0]) ?? 0.0;
+            double speedValue = double.tryParse(values[1]) ?? 0.0;
+            double voltageValue = double.tryParse(values[2]) ?? 0.0;
+            double currentValue = double.tryParse(values[3]) ?? 0.0;
+
+            currentTemperature = tempValue;
+            currentSpeed = speedValue;
+            currentVoltage = voltageValue;
+            currentCurrent = currentValue;
+
+            // Actualizar el ValueNotifier para el velocímetro
+            speedNotifier.value = currentSpeed;
+
+            // Almacenar los últimos 30 datos
+            if (temperatureData.length >= 30) {
+              temperatureData.removeAt(0);
+            }
+            temperatureData.add(currentTemperature);
+
+            if (speedData.length >= 30) {
+              speedData.removeAt(0);
+            }
+            speedData.add(currentSpeed);
+
+            if (voltageData.length >= 30) {
+              voltageData.removeAt(0);
+            }
+            voltageData.add(currentVoltage);
+
+            if (currentData.length >= 30) {
+              currentData.removeAt(0);
+            }
+            currentData.add(currentCurrent);
+          }
+        });
+      }).onDone(() {
+        print('Conexión cerrada');
+        _showConnectionClosedDialog();
+      });
+    } catch (e) {
+      print('No se pudo conectar: $e');
+      setState(() {
+        isConnecting = false;
+      });
+    }
+  }
+
+  void _showConnectionClosedDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Conexión Cerrada'),
+          content: Text('La conexión con el dispositivo se ha cerrado.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    connection?.dispose();
+    _streamController.close(); // Cerrar el StreamController al deshacerse del widget
+    speedNotifier.dispose(); // Cerrar el ValueNotifier
+    super.dispose();
+  }
+
+  void _navigateToChart(String chartType) {
+    List<double> dataToPass;
+    switch (chartType) {
+      case 'temperature':
+        dataToPass = List.from(temperatureData);
+        break;
+      case 'speed':
+        dataToPass = List.from(speedData);
+        break;
+      case 'voltage':
+        dataToPass = List.from(voltageData);
+        break;
+      case 'current':
+        dataToPass = List.from(currentData);
+        break;
+      default:
+        dataToPass = [];
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChartsScreen(
+          data: dataToPass,
+          chartType: chartType,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToDataScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DataScreen(stream: _streamController.stream),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final orientation = MediaQuery.of(context).orientation;
+
+    if (orientation == Orientation.landscape) {
+      // Modo horizontal
+      return Scaffold(
+        backgroundColor: Colors.blueGrey[900],
+        appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 78, 161, 202),
+          title: Text(
+            'Eco-Metry',
+            style: TextStyle(color: Colors.white),
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        body: Center(
+          child: Row(
+            children: [
+              // Speedometer a la izquierda con margen izquierdo
+              Padding(
+                padding: const EdgeInsets.only(left: 60.0, top: 15.0), // Margen izquierdo
+                child: Container(
+                  width: 310, // Tamaño aumentado
+                  height: 310, // Tamaño aumentado
+                  child: ValueListenableBuilder<double>(
+                    valueListenable: speedNotifier,
+                    builder: (context, speed, child) {
+                      print('Rebuild del velocímetro con velocidad: $speed');
+                      return KdGaugeView(
+                        minSpeed: 0,
+                        maxSpeed: 60,
+                        speed: speed,
+                        animate: true, // Activar animación
+                        duration: Duration(milliseconds: 300), // Duración de la animación
+                        alertSpeedArray: [20, 40, 60],
+                        alertColorArray: [Colors.green, Colors.orange, Colors.red],
+                        unitOfMeasurement: "km/h",
+                        gaugeWidth: 20,
+                        fractionDigits: 1,
+                        speedTextStyle: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 36,
+                        ),
+                        unitOfMeasurementTextStyle: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              SizedBox(width: 155),
+              // Column of remaining boxes
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Temperature
+                    Padding(
+                      padding: const EdgeInsets.only(top: 13.0, right: 45.0), // Margen superior de 16px
+                      child: GestureDetector(
+                        //onTap: () => _navigateToChart('temperature'),
+                        child: Container(
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.blueGrey[700],
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: Colors.blueGrey[300]!,
+                              width: 2.0,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${currentTemperature.toStringAsFixed(1)} °C',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    // Voltage
+                    GestureDetector(
+                      //onTap: () => _navigateToChart('voltage'),
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 45.0), // Margen derecho de 10px
+                        child: Container(
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.blueGrey[700],
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: Colors.blueGrey[300]!,
+                              width: 2.0,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${currentVoltage.toStringAsFixed(1)} V',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    // Current
+                    Padding(
+                      padding: const EdgeInsets.only(right: 45.0), // Margen derecho de 10px
+                      child: GestureDetector(
+                        //onTap: () => _navigateToChart('current'),
+                        child: Container(
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.blueGrey[700],
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: Colors.blueGrey[300]!,
+                              width: 2.0,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${currentCurrent.toStringAsFixed(1)} A',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      // Modo vertical
+      return Scaffold(
+        backgroundColor: Colors.blueGrey[900],
+        appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 78, 161, 202),
+          title: Text(
+            'Eco-Metry',
+            style: TextStyle(color: Colors.white),
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Speedometer at the top
+              Container(
+                width: 300,
+                height: 300,
+                child: ValueListenableBuilder<double>(
+                  valueListenable: speedNotifier,
+                  builder: (context, speed, child) {
+                    print('Rebuild del velocímetro con velocidad: $speed');
+                    return KdGaugeView(
+                      minSpeed: 0,
+                      maxSpeed: 60,
+                      speed: speed,
+                      animate: true, // Activar animación
+                      duration: Duration(milliseconds: 300), // Duración de la animación
+                      alertSpeedArray: [20, 40, 60],
+                      alertColorArray: [Colors.green, Colors.orange, Colors.red],
+                      unitOfMeasurement: "km/h",
+                      gaugeWidth: 20,
+                      fractionDigits: 1,
+                      speedTextStyle: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 36,
+                      ),
+                      unitOfMeasurementTextStyle: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: 20),
+              // Temperature
+              GestureDetector(
+                //onTap: () => _navigateToChart('temperature'),
+                child: Container(
+                  width: 300,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey[700],
+                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(
+                      color: Colors.blueGrey[300]!,
+                      width: 2.0,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${currentTemperature.toStringAsFixed(1)} °C',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              // Voltage
+              GestureDetector(
+                //onTap: () => _navigateToChart('voltage'),
+                child: Container(
+                  width: 300,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey[700],
+                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(
+                      color: Colors.blueGrey[300]!,
+                      width: 2.0,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${currentVoltage.toStringAsFixed(1)} V',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              // Current
+              GestureDetector(
+                //onTap: () => _navigateToChart('current'),
+                child: Container(
+                  width: 300,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey[700],
+                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(
+                      color: Colors.blueGrey[300]!,
+                      width: 2.0,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${currentCurrent.toStringAsFixed(1)} A',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+}

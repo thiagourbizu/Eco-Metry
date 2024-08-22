@@ -30,10 +30,13 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   final StreamController<List<String>> _streamController =
       StreamController<List<String>>.broadcast();
 
+  Timer? _updateTimer;
+
   @override
   void initState() {
     super.initState();
     _connectToDevice();
+    _startSpeedometerUpdate(); // Iniciar actualización del velocímetro
   }
 
   void _connectToDevice() async {
@@ -46,17 +49,18 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 
       // Escuchar datos
       connection!.input!.listen((data) {
-        setState(() {
-          String valueString = String.fromCharCodes(data).trim();
-          List<String> values = valueString.split(',');
+        String valueString = String.fromCharCodes(data).trim();
+        List<String> values = valueString.split(',');
 
-          // Almacenar las últimas 50 líneas recibidas
+        // Depuración
+        print('Datos recibidos: $valueString');
+
+        setState(() {
           if (receivedLines.length >= 25) {
             receivedLines.removeAt(0);
           }
           receivedLines.add(valueString);
 
-          // Emitir datos actualizados al stream
           _streamController.add(receivedLines);
 
           if (values.length == 4) {
@@ -104,6 +108,14 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     }
   }
 
+  void _startSpeedometerUpdate() {
+    _updateTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+      setState(() {
+        // Forzar la actualización del velocímetro
+      });
+    });
+  }
+
   void _showConnectionClosedDialog() {
     showDialog(
       context: context,
@@ -129,6 +141,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   void dispose() {
     connection?.dispose();
     _streamController.close(); // Cerrar el StreamController al deshacerse del widget
+    _updateTimer?.cancel(); // Cancelar el temporizador al deshacerse del widget
     super.dispose();
   }
 
@@ -188,29 +201,38 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
           iconTheme: IconThemeData(color: Colors.white),
         ),
         body: Center(
-  child: Row(
-    children: [
-      // Speedometer a la izquierda con margen izquierdo
-      Padding(
-        padding: const EdgeInsets.only(left: 60.0, top: 15.0), // Margen izquierdo de 30px
-        child: Container(
-          width: 310, // Tamaño aumentado
-          height: 310, // Tamaño aumentado
-          child: KdGaugeView(
-            minSpeed: 0,
-            maxSpeed: 60,
-            speed: currentSpeed,
-            animate: true,
-            duration: Duration(seconds: 1),
-            alertSpeedArray: [20, 40, 60],
-            alertColorArray: [Colors.green, Colors.orange, Colors.red],
-            unitOfMeasurement: "km/h",
-            gaugeWidth: 20, // Aumentar el ancho del indicador
-            fractionDigits: 1,
-          ),
-        ),
-      ),
-      SizedBox(width: 180),
+          child: Row(
+            children: [
+              // Speedometer a la izquierda con margen izquierdo
+              Padding(
+                padding: const EdgeInsets.only(left: 60.0, top: 15.0), // Margen izquierdo
+                child: Container(
+                  width: 310, // Tamaño aumentado
+                  height: 310, // Tamaño aumentado
+                  child: KdGaugeView(
+                    minSpeed: 0,
+                    maxSpeed: 60,
+                    speed: currentSpeed,
+                    animate: false, // Activar animación
+                    alertSpeedArray: [20, 40, 60],
+                    alertColorArray: [Colors.green, Colors.orange, Colors.red],
+                    unitOfMeasurement: "km/h",
+                    gaugeWidth: 20,
+                    fractionDigits: 1,
+                    speedTextStyle: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 36,
+                    ),
+                    unitOfMeasurementTextStyle: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
+              ),
+      SizedBox(width: 155),
               // Column of remaining boxes
               Expanded(
   child: Column(
@@ -218,7 +240,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     children: [
       // Temperature
       Padding(
-        padding: const EdgeInsets.only(top: 10.0, right: 20.0), // Margen superior de 16px
+        padding: const EdgeInsets.only(top: 13.0, right: 45.0), // Margen superior de 16px
         child: GestureDetector(
           //onTap: () => _navigateToChart('temperature'),
           child: Container(
@@ -249,7 +271,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 GestureDetector(
   //onTap: () => _navigateToChart('voltage'),
   child: Padding(
-    padding: const EdgeInsets.only(right: 20.0), // Margen derecho de 10px
+    padding: const EdgeInsets.only(right: 45.0), // Margen derecho de 10px
     child: Container(
       height: 100,
       decoration: BoxDecoration(
@@ -278,7 +300,7 @@ SizedBox(height: 16),
 GestureDetector(
   //onTap: () => _navigateToChart('current'),
   child: Padding(
-    padding: const EdgeInsets.only(right: 20.0), // Margen derecho de 20px
+    padding: const EdgeInsets.only(right: 45.0), // Margen derecho de 20px
     child: Container(
       height: 100,
       decoration: BoxDecoration(
@@ -309,7 +331,9 @@ GestureDetector(
           ),
         ),
       );
-    } else     // Modo vertical
+    } 
+    else
+         // Modo vertical
     return Scaffold(
       backgroundColor: Colors.blueGrey[900],
       appBar: AppBar(
