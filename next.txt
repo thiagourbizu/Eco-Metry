@@ -42,3 +42,26 @@ no creo que funcione pero si funciona ❔
 que falta ❔❔❔❔
 QUE ANDE EL SHUNT
 varela esta enojado ✔✔✔
+
+proximas intervenciones v0.4 ---- ✘✔❔ (24/08) (22:41hs)
+muchos cambios en 2 dias...
+velocimetro andando ✔✔✔
+aplicacion 90%...
+no vamos a usar shunt ✘
+vamos a usar ACS712 !!!
+-----
+(lunes 26/08) comprar 1 placa 5x5, portapilasv2, una bornera, pines hembra a maxi y ACS712 (aqui agregar) ❔
+(a la tarde)
+dividimos equipos, 1=preparan placa(receptor) 2=probar ACS712 ❔
+minimo aujerear placa para ese lunes
+(martes 27/08)
+(a la maniana) - chamba
+idealmente diseniar transmisor o ya tenerlo preparado ❔
+(a la tarde)
+probar proto trans(❔)
+
+if works
+	proyect almost finished
+
+see you later my friend...
+(varela esta contento ✔✔✔)
