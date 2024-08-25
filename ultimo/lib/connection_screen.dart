@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'data_screen.dart'; // Importar la nueva pantalla de datos
 import 'charts.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'dart:async';
-import 'package:kdgaugeview/kdgaugeview.dart';
+//import 'package:kdgaugeview/kdgaugeview.dart';
 
 class ConnectionScreen extends StatefulWidget {
   final BluetoothDevice device;
@@ -75,7 +76,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
             currentCurrent = currentValue;
 
             // Almacenar los últimos 30 datos
-            if (temperatureData.length >= 30) {
+            if (temperatureData.length >= 50) {
               temperatureData.removeAt(0);
             }
             temperatureData.add(currentTemperature);
@@ -185,53 +186,127 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final orientation = MediaQuery.of(context).orientation;
+Widget build(BuildContext context) {
+  final orientation = MediaQuery.of(context).orientation;
 
-    if (orientation == Orientation.landscape) {
-      // Modo horizontal
-      return Scaffold(
-        backgroundColor: Colors.blueGrey[900],
-        appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 78, 161, 202),
-          title: Text(
-            'Eco-Metry',
-            style: TextStyle(color: Colors.white),
-          ),
-          iconTheme: IconThemeData(color: Colors.white),
+  if (orientation == Orientation.landscape) {
+    // Modo horizontal
+    return Scaffold(
+      backgroundColor: Colors.blueGrey[900],
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 78, 161, 202),
+        title: Text(
+          'Conectado a ${widget.device.name}',
+          style: TextStyle(color: Colors.white),
         ),
-        body: Center(
-          child: Row(
-            children: [
-              // Speedometer a la izquierda con margen izquierdo
-              Padding(
-                padding: const EdgeInsets.only(left: 60.0, top: 15.0), // Margen izquierdo
-                child: Container(
-                  width: 310, // Tamaño aumentado
-                  height: 310, // Tamaño aumentado
-                  child: KdGaugeView(
-                    minSpeed: 0,
-                    maxSpeed: 60,
-                    speed: currentSpeed,
-                    animate: false, // Activar animación
-                    alertSpeedArray: [20, 40, 60],
-                    alertColorArray: [Colors.green, Colors.orange, Colors.red],
-                    unitOfMeasurement: "km/h",
-                    gaugeWidth: 20,
-                    fractionDigits: 1,
-                    speedTextStyle: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 36,
-                    ),
-                    unitOfMeasurementTextStyle: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                  ),
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      body: Center(
+        child: Row(
+          children: [
+            // Nuevo velocímetro a la izquierda con margen izquierdo
+            Padding(
+              padding: const EdgeInsets.only(left: 70.0, top: 15.0), // Margen izquierdo
+              child: Container(
+                width: 310, // Tamaño del velocímetro
+                height: 310, // Tamaño del velocímetro
+                child: TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0.0, end: currentSpeed),
+                  duration: const Duration(milliseconds: 100), // Duración de la animación
+                  builder: (BuildContext context, double value, Widget? child) {
+                    return Center(
+                      child: Stack(
+                        children: [
+                          // Fondo redondeado detrás del velocímetro
+                          Container(
+                            width: 310,
+                            height: 310,
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(155), // Radio de borde redondeado
+                              border: Border.all(
+                                width: 20, // Grosor del borde
+                                color: Colors.black.withOpacity(0.3), // Color del borde
+                              ),
+                            ),
+                          ),
+                          SfRadialGauge(
+                            axes: <RadialAxis>[
+                              RadialAxis(
+                                minimum: 0,
+                                maximum: 60, // Ajustado para un máximo de 60 km/h
+                                ranges: <GaugeRange>[
+                                  // Color verde
+                                  GaugeRange(
+                                    startValue: 0,
+                                    endValue: value < 20 ? value : 20,
+                                    color: Colors.green,
+                                    startWidth: 20,
+                                    endWidth: 20,
+                                  ),
+                                  // Color naranja
+                                  GaugeRange(
+                                    startValue: 20,
+                                    endValue: value < 40 ? value : 40,
+                                    color: Colors.orange,
+                                    startWidth: 20,
+                                    endWidth: 20,
+                                  ),
+                                  // Color rojo
+                                  GaugeRange(
+                                    startValue: 40,
+                                    endValue: value < 60 ? value : 60,
+                                    color: Colors.red,
+                                    startWidth: 20,
+                                    endWidth: 20,
+                                  ),
+                                  GaugeRange(
+                                    startValue: 70,
+                                    endValue: value < 70 ? value : 70,
+                                    color: const Color.fromARGB(255, 85, 85, 85),
+                                    startWidth: 20,
+                                    endWidth: 20,
+                                  )
+                                ],
+                                pointers: <GaugePointer>[
+                                  NeedlePointer(value: value),
+                                ],
+                                annotations: <GaugeAnnotation>[
+                                  GaugeAnnotation(
+                                    widget: Padding(
+                                      padding: const EdgeInsets.only(top: 50.0), // Ajusta la posición hacia abajo
+                                      child: Text(
+                                        'km/h',
+                                        style: TextStyle(
+                                          fontSize: 20, // Tamaño de fuente para "km/h"
+                                          fontWeight: FontWeight.bold, // Velocidad en negrita
+                                          color: Colors.white, // Color del texto
+                                        ),
+                                      ),
+                                    ),
+                                    angle: 90,
+                                    positionFactor: 0.5,
+                                  ),
+                                ],
+                                axisLabelStyle: GaugeTextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20, // Tamaño de fuente agrandado para las etiquetas
+                                ),
+                                majorTickStyle: MajorTickStyle(
+                                  length: 15,
+                                  thickness: 2,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
+            ),
       SizedBox(width: 155),
               // Column of remaining boxes
               Expanded(
@@ -240,7 +315,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     children: [
       // Temperature
       Padding(
-        padding: const EdgeInsets.only(top: 13.0, right: 45.0), // Margen superior de 16px
+        padding: const EdgeInsets.only(top: 13.0, right: 50.0), // Margen superior de 16px
         child: GestureDetector(
           //onTap: () => _navigateToChart('temperature'),
           child: Container(
@@ -271,7 +346,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 GestureDetector(
   //onTap: () => _navigateToChart('voltage'),
   child: Padding(
-    padding: const EdgeInsets.only(right: 45.0), // Margen derecho de 10px
+    padding: const EdgeInsets.only(right: 50.0), // Margen derecho de 10px
     child: Container(
       height: 100,
       decoration: BoxDecoration(
@@ -300,7 +375,7 @@ SizedBox(height: 16),
 GestureDetector(
   //onTap: () => _navigateToChart('current'),
   child: Padding(
-    padding: const EdgeInsets.only(right: 45.0), // Margen derecho de 20px
+    padding: const EdgeInsets.only(right: 50.0), // Margen derecho de 20px
     child: Container(
       height: 100,
       decoration: BoxDecoration(

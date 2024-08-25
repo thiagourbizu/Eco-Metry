@@ -9,6 +9,9 @@ SoftwareSerial BTSerial(bluRX, bluTX); // RX, TX
 const int sensorPin = A5;
 float temperatureC;
 
+// Variable para la velocidad
+int velocidad = 0;
+
 void setup() {
   // Inicia la comunicación serie con el PC
   Serial.begin(115200);
@@ -25,9 +28,13 @@ void loop() {
   int sensorValue = analogRead(sensorPin); // Lee el valor del sensor (0-1023)
   temperatureC = sensorValue * (5.0 / 1023.0) * 100.0; // Convierte el valor a grados Celsius
 
-  // Generar un número aleatorio entre 5 y 60 para la velocidad
-  int velocidad = random(5, 61); // El límite superior es exclusivo, así que usa 61 para incluir 60
+  // Incrementar la velocidad y reiniciar a 0 si llega a 60
+  velocidad++;
+  if (velocidad >= 60) {
+    velocidad = 0;
+  }
 
+  // Asignar valores fijos para voltaje y amperaje
   int voltaje = 1;
   int amperaje = 2;
 
@@ -40,5 +47,5 @@ void loop() {
   // Enviar el dato leído a través del módulo Bluetooth
   BTSerial.println(cadena);
   
-  delay(1000); // Espera 1 segundo
+  delay(100); // Espera 100 milisegundos
 }
