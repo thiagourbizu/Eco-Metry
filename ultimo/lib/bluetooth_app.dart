@@ -4,7 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:async'; // Importación necesaria para StreamSubscription
 import 'connection_screen.dart'; // Importar la pantalla de conexión
 import 'package:url_launcher/url_launcher.dart';
-import 'package:external_app_launcher/external_app_launcher.dart'; // Importar external_app_launcher para abrir enlaces
+//import 'package:external_app_launcher/external_app_launcher.dart'; // Importar external_app_launcher para abrir enlaces
 
 class BluetoothApp extends StatefulWidget {
   @override

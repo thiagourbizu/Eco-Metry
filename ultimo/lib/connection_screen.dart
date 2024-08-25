@@ -6,6 +6,57 @@ import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'dart:async';
 //import 'package:kdgaugeview/kdgaugeview.dart';
 
+
+
+Widget _buildDataContainer(
+    String label,
+    String value,
+    String unit,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      //onTap: onTap,
+      child: Container(
+        width: 150,
+        height: 150,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            Text(
+              unit,
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 Color colorA = Color.fromARGB(255, 153, 9, 182);
 Color colorT = Colors.orange;
 Color colorVel = Colors.blue;
@@ -217,7 +268,7 @@ Widget build(BuildContext context) {
           children: [
             // Nuevo velocímetro a la izquierda con margen izquierdo
             Padding(
-              padding: const EdgeInsets.only(left: 70.0, top: 15.0), // Margen izquierdo
+              padding: const EdgeInsets.only(left: 75.0, top: 15.0), // Margen izquierdo
               child: Container(
                 width: 310, // Tamaño del velocímetro
                 height: 310, // Tamaño del velocímetro
@@ -318,98 +369,39 @@ Widget build(BuildContext context) {
                 ),
               ),
             ),
-      SizedBox(width: 155),
+      //SizedBox(width: 155),
               // Column of remaining boxes
+              // Reubicar los cuadros en modo horizontal
               Expanded(
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      // Temperature
-      Padding(
-        padding: const EdgeInsets.only(top: 13.0, right: 50.0), // Margen superior de 16px
-        child: GestureDetector(
-          //onTap: () => _navigateToChart('temperature'),
-          child: Container(
-            height: 100,
-            decoration: BoxDecoration(
-              color: colorT,
-              borderRadius: BorderRadius.circular(12.0),
-              border: Border.all(
-                color: bordeT,
-                width: 2.0,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                '${currentTemperature.toStringAsFixed(1)} °C',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-      SizedBox(height: 16),
-                    // Voltage
-GestureDetector(
-  //onTap: () => _navigateToChart('voltage'),
-  child: Padding(
-    padding: const EdgeInsets.only(right: 50.0), // Margen derecho de 10px
-    child: Container(
-      height: 100,
-      decoration: BoxDecoration(
-        color: colorVolt,
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(
-          color: bordeVolt,
-          width: 2.0,
-        ),
-      ),
-      child: Center(
-        child: Text(
-          '${currentVoltage.toStringAsFixed(1)} V',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    ),
-  ),
-),
-SizedBox(height: 16),
-                    // Current
-GestureDetector(
-  //onTap: () => _navigateToChart('current'),
-  child: Padding(
-    padding: const EdgeInsets.only(right: 50.0), // Margen derecho de 20px
-    child: Container(
-      height: 100,
-      decoration: BoxDecoration(
-        color: colorA,
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(
-          color: bordeA,
-          width: 2.0,
-        ),
-      ),
-      child: Center(
-        child: Text(
-          '${currentCurrent.toStringAsFixed(1)} A',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    ),
-  ),
-),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildDataContainer(
+                          'Voltaje',
+                          currentVoltage.toStringAsFixed(2),
+                          'V',
+                          colorVolt,
+                          () => _navigateToChart('voltage'),
+                        ),
+                        _buildDataContainer(
+                          'Amperaje',
+                          currentCurrent.toStringAsFixed(2),
+                          'A',
+                          colorA,
+                          () => _navigateToChart('current'),
+                        ),
+                      ],
+                    ),
+                    _buildDataContainer(
+                      'Temperatura',
+                      currentTemperature.toStringAsFixed(1),
+                      '°C',
+                      colorT,
+                      () => _navigateToChart('temperature'),
+                    ),
                   ],
                 ),
               ),
@@ -417,8 +409,7 @@ GestureDetector(
           ),
         ),
       );
-    } 
-    else
+    } else {
   // Modo vertical
   return Scaffold(
     backgroundColor: Colors.blueGrey[900],
@@ -659,5 +650,6 @@ GestureDetector(
       ),
     ),
   );
+}
 }
 }
