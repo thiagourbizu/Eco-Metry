@@ -6,6 +6,17 @@ import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'dart:async';
 //import 'package:kdgaugeview/kdgaugeview.dart';
 
+Color colorA = Color.fromARGB(255, 153, 9, 182);
+Color colorT = Colors.orange;
+Color colorVel = Colors.blue;
+Color colorVolt = Colors.green;
+
+Color bordeA = Color.fromARGB(255, 54, 1, 65);
+Color bordeT = const Color.fromARGB(255, 170, 103, 3);
+Color bordeVel = const Color.fromARGB(255, 1, 67, 121);
+Color bordeVolt = const Color.fromARGB(255, 2, 102, 5);
+
+
 class ConnectionScreen extends StatefulWidget {
   final BluetoothDevice device;
 
@@ -321,10 +332,10 @@ Widget build(BuildContext context) {
           child: Container(
             height: 100,
             decoration: BoxDecoration(
-              color: Colors.blueGrey[700],
+              color: colorT,
               borderRadius: BorderRadius.circular(12.0),
               border: Border.all(
-                color: Colors.blueGrey[300]!,
+                color: bordeT,
                 width: 2.0,
               ),
             ),
@@ -350,10 +361,10 @@ GestureDetector(
     child: Container(
       height: 100,
       decoration: BoxDecoration(
-        color: Colors.blueGrey[700],
+        color: colorVolt,
         borderRadius: BorderRadius.circular(12.0),
         border: Border.all(
-          color: Colors.blueGrey[300]!,
+          color: bordeVolt,
           width: 2.0,
         ),
       ),
@@ -379,10 +390,10 @@ GestureDetector(
     child: Container(
       height: 100,
       decoration: BoxDecoration(
-        color: Colors.blueGrey[700],
+        color: colorA,
         borderRadius: BorderRadius.circular(12.0),
         border: Border.all(
-          color: Colors.blueGrey[300]!,
+          color: bordeA,
           width: 2.0,
         ),
       ),
@@ -408,240 +419,245 @@ GestureDetector(
       );
     } 
     else
-         // Modo vertical
-    return Scaffold(
-      backgroundColor: Colors.blueGrey[900],
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 78, 161, 202),
-        title: Text(
-          'Conectado a ${widget.device.name}',
-          style: TextStyle(color: Colors.white),
-        ),
-        iconTheme: IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.view_list, color: Colors.white),
-            onPressed: _navigateToDataScreen,
+  // Modo vertical
+  return Scaffold(
+    backgroundColor: Colors.blueGrey[900],
+    appBar: AppBar(
+      backgroundColor: const Color.fromARGB(255, 78, 161, 202),
+      title: Text(
+        'Conectado a ${widget.device.name}',
+        style: TextStyle(color: Colors.white),
+      ),
+      iconTheme: IconThemeData(color: Colors.white),
+    ),
+    body: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          if (isConnecting)
+            Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+          SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: AspectRatio(
+                  aspectRatio: 1.0,
+                  child: GestureDetector(
+                    onTap: () => _navigateToChart('temperature'),
+                    child: Container(
+                      padding: EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: colorT,
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(
+                          color: bordeT,
+                          width: 2.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            spreadRadius: 2,
+                            blurRadius: 8,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Temperatura',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            '${currentTemperature.toStringAsFixed(1)} °C',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 32,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                child: AspectRatio(
+                  aspectRatio: 1.0,
+                  child: GestureDetector(
+                    onTap: () => _navigateToChart('speed'),
+                    child: Container(
+                      padding: EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: colorVel,
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(
+                          color: bordeVel,
+                          width: 2.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            spreadRadius: 2,
+                            blurRadius: 8,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Velocidad',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            '${currentSpeed.toStringAsFixed(1)} km/h',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 32,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: AspectRatio(
+                  aspectRatio: 1.0,
+                  child: GestureDetector(
+                    onTap: () => _navigateToChart('voltage'),
+                    child: Container(
+                      padding: EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: colorVolt,
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(
+                          color: bordeVolt,
+                          width: 2.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            spreadRadius: 2,
+                            blurRadius: 8,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Voltaje',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            '${currentVoltage.toStringAsFixed(1)} V',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 32,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                child: AspectRatio(
+                  aspectRatio: 1.0,
+                  child: GestureDetector(
+                    onTap: () => _navigateToChart('current'),
+                    child: Container(
+                      padding: EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: colorA,
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(
+                          color: bordeA,
+                          width: 2.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            spreadRadius: 2,
+                            blurRadius: 8,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Amperaje',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            '${currentCurrent.toStringAsFixed(1)} A',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 32,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Spacer(), // Asegura que el IconButton esté en la parte inferior
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: IconButton(
+              icon: Icon(
+                Icons.insert_chart,
+                color: Colors.white,
+              ),
+              onPressed: _navigateToDataScreen,
+            ), // Botón de datos en modo vertical
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            if (isConnecting)
-              Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              ),
-            SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: AspectRatio(
-                    aspectRatio: 1.0,
-                    child: GestureDetector(
-                      onTap: () => _navigateToChart('temperature'),
-                      child: Container(
-                        padding: EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.blueGrey[700],
-                          borderRadius: BorderRadius.circular(12.0),
-                          border: Border.all(
-                            color: Colors.blueGrey[300]!, // Cambiado a Colors.blueGrey[700]
-                            width: 2.0,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              spreadRadius: 2,
-                              blurRadius: 8,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Temperatura',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              '${currentTemperature.toStringAsFixed(1)} °C',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 32,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: AspectRatio(
-                    aspectRatio: 1.0,
-                    child: GestureDetector(
-                      onTap: () => _navigateToChart('speed'),
-                      child: Container(
-                        padding: EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.blueGrey[700],
-                          borderRadius: BorderRadius.circular(12.0),
-                          border: Border.all(
-                            color: Colors.blueGrey[300]!, // Cambiado a Colors.blueGrey[700]
-                            width: 2.0,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              spreadRadius: 2,
-                              blurRadius: 8,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Velocidad',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              '${currentSpeed.toStringAsFixed(1)} km/h',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 32,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: AspectRatio(
-                    aspectRatio: 1.0,
-                    child: GestureDetector(
-                      onTap: () => _navigateToChart('voltage'),
-                      child: Container(
-                        padding: EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.blueGrey[700],
-                          borderRadius: BorderRadius.circular(12.0),
-                          border: Border.all(
-                            color: Colors.blueGrey[300]!, // Cambiado a Colors.blueGrey[700]
-                            width: 2.0,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              spreadRadius: 2,
-                              blurRadius: 8,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Voltaje',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              '${currentVoltage.toStringAsFixed(1)} V',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 32,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: AspectRatio(
-                    aspectRatio: 1.0,
-                    child: GestureDetector(
-                      onTap: () => _navigateToChart('current'),
-                      child: Container(
-                        padding: EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.blueGrey[700],
-                          borderRadius: BorderRadius.circular(12.0),
-                          border: Border.all(
-                            color: Colors.blueGrey[300]!, // Cambiado a Colors.blueGrey[700]
-                            width: 2.0,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              spreadRadius: 2,
-                              blurRadius: 8,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Amperaje',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              '${currentCurrent.toStringAsFixed(1)} A',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 32,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+    ),
+  );
+}
 }

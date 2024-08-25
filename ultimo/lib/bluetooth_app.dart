@@ -3,6 +3,7 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async'; // Importación necesaria para StreamSubscription
 import 'connection_screen.dart'; // Importar la pantalla de conexión
+import 'package:url_launcher/url_launcher.dart';
 import 'package:external_app_launcher/external_app_launcher.dart'; // Importar external_app_launcher para abrir enlaces
 
 class BluetoothApp extends StatefulWidget {
@@ -114,20 +115,22 @@ class _BluetoothAppState extends State<BluetoothApp> {
   }
 
   Future<void> _launchYouTube() async {
-    const String url = 'https://www.youtube.com/watch?v=urnrIW-eaX4';
-    try {
-      await LaunchApp.openApp(
-        androidPackageName: 'com.google.android.youtube',
-        iosUrlScheme: 'youtube://',
-        appStoreLink: url,
-        openStore: false,
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("No se pudo abrir YouTube")),
-      );
+  const String url = 'https://github.com/thiagourbizu/Eco-Metry';
+  
+  try {
+    // Intenta abrir el enlace de GitHub en el navegador
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'No se pudo abrir la URL: $url';
     }
+  } catch (e) {
+    // Muestra un mensaje si algo sale mal
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("No se pudo abrir GitHub")),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
