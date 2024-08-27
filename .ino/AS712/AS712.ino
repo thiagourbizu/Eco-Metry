@@ -1,32 +1,21 @@
-const int sensorPin = 1; // Pin donde está conectado el ACS712
-const float referenceVoltage = 3.3; // Voltaje de referencia del ESP32
-const float offsetVoltage = referenceVoltage / 2; // Voltaje de referencia del sensor (1.65V)
-const float sensitivity = 0.1; // Sensibilidad del ACS712-20A en V/A (100 mV/A)
+float multiplier = 0.1; // Sensibilidad en Voltios/Ampere para el modelo de 5A
+const int analogInPin = 0; // Pin de entrada analógica donde está conectado el sensor ACS712
+float voltageOffset = 1.65; // Voltaje de salida del sensor ACS712 sin corriente (ajustable)
+float variableMagica=5.856;
 
 void setup() {
-  Serial.begin(115200); // Inicia la comunicación serial a 115200 baudios
+  Serial.begin(115200);
+  pinMode(analogInPin, INPUT);
 }
 
 void loop() {
-  int sensorValue = analogRead(sensorPin); // Leer el valor analógico
-  int invertedValue = 4095 - sensorValue;  // Invertir el valor leído
-  
-  // Convertir el valor invertido a voltios
-  float voltage = (invertedValue / 4095.0) * referenceVoltage;
-  
-  // Calcular el amperaje
-  float current = (voltage - offsetVoltage) / sensitivity;
+  int sensorValue = analogRead(analogInPin); // Leer el pin analógico
+  float sensorVoltage = sensorValue * (3.3 / 4095.0); // Convertir el valor leído a voltaje (ESP32 a 3.3V y 12 bits)
+  float current = (sensorVoltage - voltageOffset) / multiplier - variableMagica; // Calcular la corriente ajustando por el offset
 
-  // Muestra los valores en el monitor serial
-  Serial.print("Valor leído: ");
-  Serial.print(sensorValue);
-  Serial.print(" | Valor invertido: ");
-  Serial.print(invertedValue);
-  Serial.print(" | Voltaje: ");
-  Serial.print(voltage, 3); // Muestra el voltaje con 3 decimales
-  Serial.print(" V | Corriente: ");
-  Serial.print(current, 3); // Muestra la corriente con 3 decimales
-  Serial.println(" A");
+  Serial.print("Current: ");
+  Serial.println(current, 3); 
 
-  delay(1000); // Espera un segundo antes de la siguiente lectura
+  // Agrega un pequeño retardo
+  delay(100);  // 1 segundo de retardo entre lecturas
 }
