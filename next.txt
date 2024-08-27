@@ -59,7 +59,11 @@ minimo aujerear placa para ese lunes
 idealmente diseniar transmisor o ya tenerlo preparado ❔
 (a la tarde)
 probar proto trans(❔)
-
+----------agregado
+psoiblemente recolocar barra de direccion (macano)
+aujerear placa (mati)
+soldar placa (titan)
+probar modulo (grupal)
 if works
 	proyect almost finished
 

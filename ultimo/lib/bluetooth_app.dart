@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:async'; // Importación necesaria para StreamSubscription
 import 'connection_screen.dart'; // Importar la pantalla de conexión
 import 'package:url_launcher/url_launcher.dart';
+import 'settings_screen.dart'; // Asegúrate de importar el archivo
 //import 'package:external_app_launcher/external_app_launcher.dart'; // Importar external_app_launcher para abrir enlaces
 
 class BluetoothApp extends StatefulWidget {
@@ -139,7 +140,10 @@ class _BluetoothAppState extends State<BluetoothApp> {
       appBar: AppBar(
         title: GestureDetector(
           onTap: () {
-            _launchYouTube(); // Abrir enlace de YouTube al tocar el título
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SettingsScreen()),
+            );
           },
           child: Text(
             'Eco-Metry',

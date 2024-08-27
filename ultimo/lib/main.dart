@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
-import 'bluetooth_app.dart'; // Importar la aplicación Bluetooth
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'bluetooth_app.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();  // Inicializa Hive
+
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override

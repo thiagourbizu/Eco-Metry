@@ -36,12 +36,15 @@ dependencies:
   url_launcher: ^6.0.20
   kdgaugeview: ^1.0.4
 
-
+  shared_preferences: ^2.3.2
   cupertino_icons: ^1.0.6
   flutter_launcher_icons: ^0.13.1
   webview_flutter: ^4.8.0
   external_app_launcher: ^4.0.0
   syncfusion_flutter_gauges: ^20.4.54
+  path_provider: ^2.1.4
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -62,11 +65,13 @@ flutter_launcher_icons:
  image_path: assets/ecometry_icon.png
  
 flutter:
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/RobotoMono-Regular.ttf
+        - asset: assets/fonts/RobotoMono-Bold.ttf
+          weight: 700
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
-  uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
   # assets:
