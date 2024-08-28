@@ -14,7 +14,7 @@ class DataScreen extends StatelessWidget {
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color.fromARGB(255, 78, 161, 202),
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color:
               Colors.white, // Cambia el color aquí para la flecha hacia atrás
         ),

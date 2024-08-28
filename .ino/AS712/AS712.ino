@@ -11,11 +11,17 @@ void setup() {
 void loop() {
   int sensorValue = analogRead(analogInPin); // Leer el pin analógico
   float sensorVoltage = sensorValue * (3.3 / 4095.0); // Convertir el valor leído a voltaje (ESP32 a 3.3V y 12 bits)
-  float current = (sensorVoltage - voltageOffset) / multiplier - variableMagica; // Calcular la corriente ajustando por el offset
-
+  float current = (sensorVoltage - 2.235457897186279)/multiplier; // Calcular la corriente ajustando por el offset
+  Serial.print("Sensor: ");
+  Serial.print(sensorValue);
+  Serial.print(" - ");
+  Serial.print("Volt: ");
+  Serial.print(sensorVoltage, 15);
+  Serial.print(" - ");
   Serial.print("Current: ");
   Serial.println(current, 3); 
 
   // Agrega un pequeño retardo
   delay(100);  // 1 segundo de retardo entre lecturas
 }
+// AC712 WORKING
