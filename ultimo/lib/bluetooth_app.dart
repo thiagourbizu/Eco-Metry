@@ -3,9 +3,8 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async'; // Importación necesaria para StreamSubscription
 import 'connection_screen.dart'; // Importar la pantalla de conexión
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_web_browser/flutter_web_browser.dart'; // Nuevo import
 import 'settings_screen.dart'; // Asegúrate de importar el archivo
-//import 'package:external_app_launcher/external_app_launcher.dart'; // Importar external_app_launcher para abrir enlaces
 
 class BluetoothApp extends StatefulWidget {
   @override
@@ -96,6 +95,15 @@ class _BluetoothAppState extends State<BluetoothApp> {
     );
   }
 
+  Future<void> _openGitHub() async {
+    final url = 'https://github.com/thiagourbizu/Eco-Metry/tree/main/ultimo/lib';
+    try {
+      await FlutterWebBrowser.openWebPage(url: url);
+    } catch (e) {
+      print('Error al abrir la URL: $e');
+    }
+  }
+
   // Método para simular conexión a un dispositivo inexistente
   void _connectToFakeDevice() {
     // Crea un dispositivo ficticio
@@ -114,24 +122,6 @@ class _BluetoothAppState extends State<BluetoothApp> {
       ),
     );
   }
-
-  Future<void> _launchYouTube() async {
-  const String url = 'https://github.com/thiagourbizu/Eco-Metry';
-  
-  try {
-    // Intenta abrir el enlace de GitHub en el navegador
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'No se pudo abrir la URL: $url';
-    }
-  } catch (e) {
-    // Muestra un mensaje si algo sale mal
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("No se pudo abrir GitHub")),
-    );
-  }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +232,7 @@ class _BluetoothAppState extends State<BluetoothApp> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
-              onPressed: _launchYouTube, // Abre el enlace de YouTube
+              onPressed: _openGitHub, // Abre el enlace de GitHub
               child: Text("Abrir Github"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueGrey[700], // Color de fondo
