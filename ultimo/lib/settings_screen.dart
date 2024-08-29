@@ -162,7 +162,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
               ),
               IconButton(
-                icon: Icon(Icons.arrow_downward, color: Colors.white),
+                icon: const Icon(Icons.arrow_downward, color: Colors.white),
                 onPressed: () {
                   _updateValue(controller, -1);
                 },

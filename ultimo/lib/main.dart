@@ -5,7 +5,7 @@ import 'bluetooth_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();  // Inicializa Hive
+  await Hive.initFlutter(); // Inicializa Hive
 
   runApp(MyApp());
 }
@@ -15,6 +15,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Eco-Metry',
+      theme: ThemeData(
+        // No se especifica una fuente personalizada
+        textTheme: Theme.of(context).textTheme,
+        // Asegúrate de que no haya otras configuraciones de fuente aquí
+      ),
       home: BluetoothApp(),
     );
   }

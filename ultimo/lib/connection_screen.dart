@@ -6,8 +6,6 @@ import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'dart:async';
 //import 'package:kdgaugeview/kdgaugeview.dart';
 
-
-
 Widget _buildDataContainer(
     String label,
     String value,

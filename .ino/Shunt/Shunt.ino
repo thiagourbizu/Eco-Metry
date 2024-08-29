@@ -38,13 +38,13 @@ or make donation using PayPal http://robojax.com/L/?id=64
 
 */
 
-const int inPin =A0;//can change
+const int inPin =0;//can change
 const float SHUNT_CURRENT =100.00;//A
 const float SHUNT_VOLTAGE =75.0;// mV
 const float CORRECTION_FACTOR = 2.00;
 
 
-const int ITERATION = 50; //can change (see video)
+const int ITERATION = 50000; //can change (see video)
 const float VOLTAGE_REFERENCE = 1100.00;//1.1V
 const int BIT_RESOLUTION =10;//and 12 for Due and MKR
 const boolean DEBUG_ONCE = true;
@@ -52,10 +52,11 @@ const boolean DEBUG_ONCE = true;
 // the setup routine runs once when you press reset:
 void setup() {
   // initialize serial communication at 9600 bits per second:
-  Serial.begin(9600);
+  Serial.begin(115200);
+  pinMode(0,INPUT);
   Serial.println("Robojax 50A Current for Arduino");
   //for line below see https://www.arduino.cc/reference/en/language/functions/analog-io/analogreference
-  analogReference(INTERNAL);//1.1V internal reference
+  //analogReference(INTERNAL);//1.1V internal reference
   //analogReadResolution(BIT_RESOLUTION);//only Arduino with Due and MKR
   delay(500);
 }
@@ -64,8 +65,8 @@ void setup() {
 void loop() {
  //robojax.com 50A Shunt Current Measurement for Arduino
     
-  //printDebug();
-  printCurrent();
+  printDebug();
+  //printCurrent();
   //getCurrent();
 
 
