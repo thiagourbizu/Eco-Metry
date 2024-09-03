@@ -69,3 +69,21 @@ if works
 
 see you later my friend...
 (varela esta contento ✔✔✔)
+
+proximas intervenciones v0.5 ---- ✘✔❔ (29/08) (22:41hs)
+bueno, el jueves me colgue de escribir, pero, aqui vamos!!
+bueno avanzamos bastante:
+placa receptor terminada.
+pruebas en proto con la transmisor.
+pruebas sensor de corriente.
+
+lunes (tarde)
+probar sensor de corriente con el auto
+
+martes (maniana)
+terminar alfunas cosas de la app, si es que puedo y terminar el modo restringido
+martes (tarde)
+finiquitar divisor de voltaje y probar TODO en proto...
+(posiblemnete no lleguemos jaja)
+
+

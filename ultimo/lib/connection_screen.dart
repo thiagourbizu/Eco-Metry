@@ -4,6 +4,7 @@ import 'data_screen.dart'; // Importar la nueva pantalla de datos
 import 'charts.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'dart:async';
+import 'settings_manager.dart';
 //import 'package:kdgaugeview/kdgaugeview.dart';
 
 Widget _buildDataContainer(
@@ -66,6 +67,7 @@ Color bordeVel = const Color.fromARGB(255, 1, 67, 121);
 Color bordeVolt = const Color.fromARGB(255, 2, 102, 5);
 
 
+
 class ConnectionScreen extends StatefulWidget {
   final BluetoothDevice device;
 
@@ -90,8 +92,10 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 
   final StreamController<List<String>> _streamController =
       StreamController<List<String>>.broadcast();
-
+  
   Timer? _updateTimer;
+
+  
 
   @override
   void initState() {

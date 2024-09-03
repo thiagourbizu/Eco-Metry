@@ -1,7 +1,7 @@
 float multiplier = 0.1; // Sensibilidad en Voltios/Ampere para el modelo de 5A
 const int analogInPin = 0; // Pin de entrada analógica donde está conectado el sensor ACS712
 float voltageOffset = 1.65; // Voltaje de salida del sensor ACS712 sin corriente (ajustable)
-float variableMagica=5.856;
+
 
 void setup() {
   Serial.begin(115200);
@@ -11,7 +11,7 @@ void setup() {
 void loop() {
   int sensorValue = analogRead(analogInPin); // Leer el pin analógico
   float sensorVoltage = sensorValue * (3.3 / 4095.0); // Convertir el valor leído a voltaje (ESP32 a 3.3V y 12 bits)
-  float current = (sensorVoltage - 2.235457897186279)/multiplier; // Calcular la corriente ajustando por el offset
+  float current = (sensorVoltage - 2.24303144561052336669604301278013736)/multiplier; // Calcular la corriente ajustando por el offset
   Serial.print("Sensor: ");
   Serial.print(sensorValue);
   Serial.print(" - ");

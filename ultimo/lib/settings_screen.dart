@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Asegúrate de importar esto
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'settings_manager.dart'; // Asegúrate de importar tu clase SettingsManager
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -22,13 +22,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadSettings() async {
     try {
-      var box = await Hive.openBox('settings');
-      setState(() {
-        _temperatureController.text = box.get('temperature_max', defaultValue: '0');
-        _speedController.text = box.get('speed_max', defaultValue: '0');
-        _voltageController.text = box.get('voltage_max', defaultValue: '0');
-        _amperageController.text = box.get('amperage_max', defaultValue: '0');
-      });
+      final settings = SettingsManager();
+      _temperatureController.text = settings.temperatureMax;
+      _speedController.text = settings.speedMax;
+      _voltageController.text = settings.voltageMax;
+      _amperageController.text = settings.amperageMax;
     } catch (e) {
       print('Error loading settings: $e');
     }
@@ -36,11 +34,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _saveSettings() async {
     try {
-      var box = await Hive.openBox('settings');
-      await box.put('temperature_max', _temperatureController.text);
-      await box.put('speed_max', _speedController.text);
-      await box.put('voltage_max', _voltageController.text);
-      await box.put('amperage_max', _amperageController.text);
+      final settings = SettingsManager();
+      await settings.setTemperatureMax(_temperatureController.text);
+      await settings.setSpeedMax(_speedController.text);
+      await settings.setVoltageMax(_voltageController.text);
+      await settings.setAmperageMax(_amperageController.text);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -60,9 +58,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: const Color.fromARGB(255, 78, 161, 202),
         title: Text('Configuración', style: TextStyle(color: Colors.white)),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white), // Cambia el color aquí
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context); // Regresa a la pantalla anterior
+            Navigator.pop(context);
           },
         ),
         actions: [
@@ -114,8 +112,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           flex: 2,
           child: Text(
             label,
-            style: TextStyle(
-              color: Colors.white),
+            style: TextStyle(color: Colors.white),
           ),
         ),
         Expanded(
@@ -130,10 +127,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     filled: true,
                     fillColor: Colors.grey[800],
                     border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.redAccent), // Borde normal
+                      borderSide: BorderSide(color: Colors.redAccent),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: const Color.fromARGB(255, 185, 15, 15), width: 2.0), // Borde cuando está enfocado
+                      borderSide: BorderSide(color: const Color.fromARGB(255, 185, 15, 15), width: 2.0),
                     ),
                     contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
                     suffixText: suffix,

@@ -51,8 +51,9 @@ bool lora_idle = true;
 
 void setup() {
     Serial.begin(115200);
-    pinMode(1, INPUT);
+    pinMode(0, INPUT);
     txNumber = 0;
+    Serial.println("Test");
 
     RadioEvents.TxDone = OnTxDone;
     RadioEvents.TxTimeout = OnTxTimeout;
@@ -65,23 +66,25 @@ void setup() {
 }
 
 void loop() {
-    float pote = analogRead(1);  // Simulación de lectura analógica
-    float value2 = 10;       // Ejemplo de segundo valor
-    float value3 = 1;       // Ejemplo de tercer valor
-    float value4 = 3;       // Ejemplo de cuarto valor
+    //int Lectura0 = analogRead(0);  // Simulación de lectura analógica
+    float PinVoltaje = analogRead(0) * (3.3/4095);
+    float current = (PinVoltaje - 2.24303144561052336669604301278013736) / 0.1;
+    float voltaje = 10;       // Ejemplo de segundo valor
+    float velocidad= 1;       // Ejemplo de tercer valor
+    float temperature = 3;       // Ejemplo de cuarto valor
 
     if (lora_idle) {
         txNumber += 1;
-        delay(1000);
+        delay(100);
         // Formatea la cadena con 4 valores
-        sprintf(txpacket,"%.2f,%.2f,%.2f,%.2f", pote, value2, value3, value4);
+        sprintf(txpacket,"%.2f,%.2f,%.2f,%.2f", temperature, velocidad, voltaje, current);
         Serial.printf("\r\nsending packet \"%s\" , length %d\r\n", txpacket, strlen(txpacket));
         turnOnRGB(COLOR_SEND, 0); // Cambia el color del RGB
         Radio.Send((uint8_t *)txpacket, strlen(txpacket)); // Envía el paquete
         lora_idle = false;
     }
 }
-
+ 
 void OnTxDone(void) {
     turnOffRGB();
     Serial.println("TX done......");
