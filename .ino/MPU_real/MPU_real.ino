@@ -1,12 +1,11 @@
 #include "MPU6050.h"
 #include "Wire.h"
 #include "I2Cdev.h"
-#include <SoftwareSerial.h>
 
-const float CONST_16G = 2048;
+const float CONST_16G = 2048.0;
 const float CONST_2000 = 16.4;
 const float CONST_G = 9.81;
-const float RADIANS_TO_DEGREES = 180 / 3.14159;
+const float RADIANS_TO_DEGREES = 180.0 / 3.14159;
 const float ALPHA = 0.96;
 const float KMPH = 3.6;
 
@@ -20,20 +19,23 @@ int16_t ax_offset, ay_offset, az_offset, gx_offset, gy_offset, gz_offset;
 int16_t temperature;
 
 void setup() {
-  Wire.begin();
-  Serial.begin(9600);
+  // Inicializar I2C con los pines definidos
+  Wire.begin(GPIO9, GPIO8 );
+
+  Serial.begin(115200); // Usa Serial para depuración
 
   Serial.println("Bluetooth Connected");
 
-  // initialize device
+  // Inicializar dispositivo MPU6050
   Serial.println("Initializing I2C devices...");
   accelgyro.initialize();
 
   Serial.println("Testing device connections...");
   Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
 
-  accelgyro.setFullScaleAccelRange(0x03);
-  accelgyro.setFullScaleGyroRange(0x03);
+  // Configurar los rangos de escala completa
+  accelgyro.setFullScaleAccelRange(MPU6050_ACCEL_FS_16);
+  accelgyro.setFullScaleGyroRange(MPU6050_GYRO_FS_2000);
 
   calibrate_sensors();
   set_last_time(millis());
@@ -46,14 +48,13 @@ void loop() {
 
   float ax_p = (ax - ax_offset) / CONST_16G;
   float ay_p = (ay - ay_offset) / CONST_16G;
-  float az_p = (az / CONST_16G);
+  float az_p = az / CONST_16G;
 
   float accel_angle_y = atan(-1 * ax_p / sqrt(pow(ay_p, 2) + pow(az_p, 2))) * RADIANS_TO_DEGREES;
   float accel_angle_x = atan(ay_p / sqrt(pow(ax_p, 2) + pow(az_p, 2))) * RADIANS_TO_DEGREES;
 
   float gx_p = (gx - gx_offset) / CONST_2000;
   float gy_p = (gy - gy_offset) / CONST_2000;
-  float gz_p = (gz - gz_offset) / CONST_2000;
 
   float gyro_angle_x = gx_p * dt + get_last_angle_x();
   float gyro_angle_y = gy_p * dt + get_last_angle_y();
@@ -88,24 +89,22 @@ void loop() {
   set_last_angle_x(angle_x);
   set_last_angle_y(angle_y);
 
-  delay(500);
+  delay(100);
 }
 
 void calibrate_sensors() {
-  int                   num_readings = 100;
-  float                 x_accel = 0;
-  float                 y_accel = 0;
-  float                 z_accel = 0;
-  float                 x_gyro = 0;
-  float                 y_gyro = 0;
-  float                 z_gyro = 0;
+  int num_readings = 1000;
+  float x_accel = 0;
+  float y_accel = 0;
+  float z_accel = 0;
+  float x_gyro = 0;
+  float y_gyro = 0;
+  float z_gyro = 0;
 
   Serial.println("Starting Calibration");
 
-  // Discard the first set of values read from the IMU
   accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
-  // Read and average the raw values from the IMU
   for (int i = 0; i < num_readings; i++) {
     accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
@@ -122,7 +121,7 @@ void calibrate_sensors() {
     Serial.print(gy / CONST_2000);
     Serial.print(",");
     Serial.println(gz / CONST_2000);
-    
+
     x_accel += ax;
     y_accel += ay;
     z_accel += az;
@@ -131,6 +130,7 @@ void calibrate_sensors() {
     z_gyro += gz;
     delay(10);
   }
+
   x_accel /= num_readings;
   y_accel /= num_readings;
   z_accel /= num_readings;
@@ -138,7 +138,6 @@ void calibrate_sensors() {
   y_gyro /= num_readings;
   z_gyro /= num_readings;
 
-  // Store the raw calibration values globally
   ax_offset = x_accel;
   ay_offset = y_accel;
   az_offset = z_accel;
