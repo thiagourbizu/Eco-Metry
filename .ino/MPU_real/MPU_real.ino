@@ -1,6 +1,13 @@
 #include "MPU6050.h"
 #include "Wire.h"
 #include "I2Cdev.h"
+#include "Arduino.h"
+
+// Configuración del puerto serie
+#define BT_BAUD_RATE 115200 // Velocidad de comunicación con HC-05
+#define DELAY_MS 100     // Retraso entre transmisiones (milisegundos)
+
+HardwareSerial BTserial(1); // UART1 para el HC-05
 
 const float CONST_16G = 2048.0;
 const float CONST_2000 = 16.4;
@@ -21,7 +28,10 @@ int16_t temperature;
 void setup() {
   // Inicializar I2C con los pines definidos
   Wire.begin(GPIO9, GPIO8 );
-
+  
+  // Inicializa el puerto serie para la comunicación con el HC-05
+  BTserial.begin(BT_BAUD_RATE);
+  
   Serial.begin(115200); // Usa Serial para depuración
 
   Serial.println("Bluetooth Connected");
@@ -68,6 +78,17 @@ void loop() {
 
   temperature = (accelgyro.getTemperature() + 12412) / 340;
 
+  int temperature_1= 100;
+  int voltaje = 1;
+  int amperaje = 2;
+  //int roundedTempC = round(temperatureC);
+
+  // También mostrar la temperatura en el monitor serial
+ // Serial.println(temperatureC,hola);
+  String cadena = String(temperature_1) + "," + String(vel) + "," +  String(voltaje) + "," + String(amperaje);
+
+  BTserial.print(cadena);
+  Serial.println(cadena);
   Serial.print("  vel: ");
   Serial.print(vel, 4);
   Serial.print("km/hr");
