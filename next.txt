@@ -95,12 +95,17 @@ lo proximo que tenemos que hacer es lo siguiente hermano
 probar acelerometro con "mpu_code"
 si no, hacer que funcione
 SI NO FUNCIONA
-proponerle a tripaldi usar la velocidad del celular...
+	proponerle a tripaldi usar la velocidad del celular...
+	rpm del motor???
+	Velocidad magnetica???
 aparte:
 decirle a macano lo del diseño 3D...
-colocar cadena, y medir con tacometro la velocidad maxima del motor
+no hace una verga ✔✔✔
+
+poner cadena, y medir con tacometro la velocidad maxima del motor
 y medir el cable amarillo a ver que onda (baterias cargadas para esto)
 listo, con eso sacamos las rpm...
+
 una vez medido todo y listo, rootear bien la placa y hacerla (lo mas ez)
 chau, no se cuando vas a leer esto
 
