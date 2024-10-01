@@ -1,80 +1,114 @@
-/*
-	Capitulo 65 de Arduino desde cero en Español.
-	Visualizacion por monitor serie de las lecturas del MPU6050 para yaw, pitch y roll.
-	Requiere librerias I2cdev, Simple_MPU6050 y Simple_Wire
+#include "MPU6050.h"
+#include "Wire.h"
+#include "I2Cdev.h"
 
-	Codigo basado en el programa de ejemplo incluido en la libreria Simple_MPU6050
+// Configuración del puerto serie
+#define BT_BAUD_RATE 115200 // Velocidad de comunicación con HC-05
+#define DELAY_MS 100     // Retraso entre transmisiones (milisegundos)
 
-	https://www.youtube.com/c/BitwiseAr
-	Autor: bitwiseAr  
+HardwareSerial BTserial(1); // UART1 para el HC-05
 
-*/
+const float CONST_16G = 2048.0;
+const float CONST_2000 = 16.4;
+const float CONST_G = 9.81;
+const float RADIANS_TO_DEGREES = 180.0 / 3.14159;
+const float ALPHA = 0.96;
+const float KMPH = 3.6;
 
-#include "Simple_MPU6050.h"					// incluye libreria Simple_MPU6050
-#define MPU6050_ADDRESS_AD0_LOW     0x68			// direccion I2C con AD0 en LOW o sin conexion
-#define MPU6050_ADDRESS_AD0_HIGH    0x69			// direccion I2C con AD0 en HIGH
-#define MPU6050_DEFAULT_ADDRESS     MPU6050_ADDRESS_AD0_LOW	// por defecto AD0 en LOW
+MPU6050 accelgyro;
 
-Simple_MPU6050 mpu;				// crea objeto con nombre mpu
-// ENABLE_MPU_OVERFLOW_PROTECTION();		// activa proteccion, ya no se requiere
+unsigned long last_read_time;
+int16_t ax, ay, az, gx, gy, gz;
+float angle_x = 0, angle_y = 0;
+float ax_offset, ay_offset, az_offset;
 
-// #define OFFSETS  -5114,     484,    1030,      46,     -14,       6  // Colocar valores personalizados
-
-#define spamtimer(t) for (static uint32_t SpamTimer; (uint32_t)(millis() - SpamTimer) >= (t); SpamTimer = millis())
-// spamtimer funcion para generar demora al escribir en monitor serie sin usar delay()
-
-#define printfloatx(Name,Variable,Spaces,Precision,EndTxt) print(Name); {char S[(Spaces + Precision + 3)];Serial.print(F(" ")); Serial.print(dtostrf((float)Variable,Spaces,Precision ,S));}Serial.print(EndTxt);
-// printfloatx funcion para mostrar en monitor serie datos para evitar el uso se multiples print()
-
-// mostrar_valores funcion que es llamada cada vez que hay datos disponibles desde el sensor
-void mostrar_valores (int16_t *gyro, int16_t *accel, int32_t *quat, uint32_t *timestamp) {	
-  uint8_t SpamDelay = 100;			// demora para escribir en monitor serie de 100 mseg
-  Quaternion q;					// variable necesaria para calculos posteriores
-  VectorFloat gravity;				// variable necesaria para calculos posteriores
-  float ypr[3] = { 0, 0, 0 };			// array para almacenar valores de yaw, pitch, roll
-  float xyz[3] = { 0, 0, 0 };			// array para almacenar valores convertidos a grados de yaw, pitch, roll
-  spamtimer(SpamDelay) {			// si han transcurrido al menos 100 mseg entonces proceder
-    mpu.GetQuaternion(&q, quat);		// funcion para obtener valor para calculo posterior
-    mpu.GetGravity(&gravity, &q);		// funcion para obtener valor para calculo posterior
-    mpu.GetYawPitchRoll(ypr, &q, &gravity);	// funcion obtiene valores de yaw, ptich, roll
-    mpu.ConvertToDegrees(ypr, xyz);		// funcion convierte a grados sexagesimales
-    Serial.printfloatx(F("Yaw")  , xyz[0], 9, 4, F(",   "));  // muestra en monitor serie rotacion de eje Z, yaw
-    Serial.printfloatx(F("Pitch"), xyz[1], 9, 4, F(",   "));  // muestra en monitor serie rotacion de eje Y, pitch
-    Serial.printfloatx(F("Roll") , xyz[2], 9, 4, F(",   "));  // muestra en monitor serie rotacion de eje X, roll
-    Serial.println();				// salto de linea
-  }
-}
+float velocity_x = 0, velocity_y = 0; // Velocidades en m/s
 
 void setup() {
-  uint8_t val;
-#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE	// activacion de bus I2C a 400 Khz
-  Wire.begin();
-  Wire.setClock(400000);
-#elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
-  Fastwire::setup(400, true);
-#endif
-  
-  Serial.begin(115200);			// inicializacion de monitor serie a 115200 bps
-  while (!Serial); 			// espera a enumeracion en caso de modelos con USB nativo
-  Serial.println(F("Inicio:"));		// muestra texto estatico
-#ifdef OFFSETS								// si existen OFFSETS
-  Serial.println(F("Usando Offsets predefinidos"));			// texto estatico
-  mpu.SetAddress(MPU6050_ADDRESS_AD0_LOW).load_DMP_Image(OFFSETS);	// inicializacion de sensor
+  Wire.begin(GPIO9, GPIO8 );
+  Serial.begin(115200);
+  BTserial.begin(115200);
 
-#else										// sin no existen OFFSETS
-  Serial.println(F(" No se establecieron Offsets, haremos unos nuevos.\n"	// muestra texto estatico
-                   " Colocar el sensor en un superficie plana y esperar unos segundos\n"
-                   " Colocar los nuevos Offsets en #define OFFSETS\n"
-                   " para saltar la calibracion inicial \n"
-                   " \t\tPresionar cualquier tecla y ENTER"));
-  while (Serial.available() && Serial.read());		// lectura de monitor serie
-  while (!Serial.available());   			// si no hay espera              
-  while (Serial.available() && Serial.read()); 		// lecyura de monitor serie
-  mpu.SetAddress(MPU6050_ADDRESS_AD0_LOW).CalibrateMPU().load_DMP_Image();	// inicializacion de sensor
-#endif
-  mpu.on_FIFO(mostrar_valores);		// llamado a funcion mostrar_valores si memoria FIFO tiene valores
+  BTserial.println("Bluetooth Connected");
+
+  accelgyro.initialize();
+  if (!accelgyro.testConnection()) {
+    Serial.println("MPU6050 connection failed");
+    while (1);
+  }
+
+  accelgyro.setFullScaleAccelRange(0x03);
+  accelgyro.setFullScaleGyroRange(0x03);
+
+  calibrate_sensors();
+  set_last_time(millis());
 }
 
 void loop() {
-  mpu.dmp_read_fifo();		// funcion que evalua si existen datos nuevos en el sensor y llama
-}				// a funcion mostrar_valores si es el caso
+  unsigned long t_now = millis();
+  float dt = get_delta_time(t_now);
+  accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+
+  // Calibración de aceleración
+  float ax_p = (ax - ax_offset) / CONST_16G;
+  float ay_p = (ay - ay_offset) / CONST_16G;
+
+  // Compensar gravedad
+  ax_p -= (sin(angle_x * RADIANS_TO_DEGREES) * CONST_G);
+  ay_p -= (sin(angle_y * RADIANS_TO_DEGREES) * CONST_G);
+
+  // Actualizar velocidades
+  velocity_x += ax_p * dt; // Integración
+  velocity_y += ay_p * dt;
+
+  // Calcular magnitud de la velocidad
+  float velocity = sqrt(velocity_x * velocity_x + velocity_y * velocity_y) * KMPH;
+
+  // Imprimir valores
+  Serial.print("Vel: ");
+  Serial.print(velocity, 4);
+  Serial.println(" km/hr");
+  int temperature_1= 100;
+  int voltaje = 1;
+  int amperaje = 2;
+  //int roundedTempC = round(temperatureC);
+
+  // También mostrar la temperatura en el monitor serial
+ // Serial.println(temperatureC,hola);
+  String cadena = String(temperature_1) + "," + String(velocity) + "," +  String(voltaje) + "," + String(amperaje);
+
+  BTserial.print(cadena);
+  
+  set_last_time(t_now);
+  delay(100); // Reducción del delay
+}
+
+void calibrate_sensors() {
+  const int num_readings = 1000;
+  float x_accel = 0, y_accel = 0, z_accel = 0;
+
+  for (int i = 0; i < num_readings; i++) {
+    accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    x_accel += ax;
+    y_accel += ay;
+    z_accel += az;
+    delay(10);
+  }
+  ax_offset = x_accel / num_readings;
+  ay_offset = y_accel / num_readings;
+  az_offset = z_accel / num_readings; // No es necesario para el cálculo horizontal, pero puede ser útil
+
+  Serial.println("Calibration finished");
+}
+
+inline unsigned long get_last_time() {
+  return last_read_time;
+}
+
+inline void set_last_time(unsigned long _time) {
+  last_read_time = _time;
+}
+
+inline float get_delta_time(unsigned long t_now) {
+  return (t_now - get_last_time()) / 1000.0;
+}

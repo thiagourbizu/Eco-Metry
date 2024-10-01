@@ -86,4 +86,21 @@ martes (tarde)
 finiquitar divisor de voltaje y probar TODO en proto...
 (posiblemnete no lleguemos jaja)
 
+proximas intervenciones v0.6 ---- ✘✔❔ (26/09)
+bueno, me robaron el celu, estoy re triste ajaja
+el desafio eco no se hace ✘✘✘✘
+todo mal
+pero la vida sigue...
+lo proximo que tenemos que hacer es lo siguiente hermano
+probar acelerometro con "mpu_code"
+si no, hacer que funcione
+SI NO FUNCIONA
+proponerle a tripaldi usar la velocidad del celular...
+aparte:
+decirle a macano lo del diseño 3D...
+colocar cadena, y medir con tacometro la velocidad maxima del motor
+y medir el cable amarillo a ver que onda (baterias cargadas para esto)
+listo, con eso sacamos las rpm...
+una vez medido todo y listo, rootear bien la placa y hacerla (lo mas ez)
+chau, no se cuando vas a leer esto
 
