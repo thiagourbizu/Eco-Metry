@@ -109,3 +109,12 @@ listo, con eso sacamos las rpm...
 una vez medido todo y listo, rootear bien la placa y hacerla (lo mas ez)
 chau, no se cuando vas a leer esto
 
+proximas intervenciones v0.6 ---- ✘✔❔ (08/10)
+bueno, adaptamos un par de cosas, hoy, vamos a hacer placa 3x1,6 de sensor hall
+ver en donde lo vamos a ubicar
+macano deja de poner excusas y hace el diseño
+por suerte nunca lo va a leer
+hoy se termina eso
+para despues, terminar de rootear bien la placa ahora si y despues empezar
+con los allegados al tema viste
+nos volverermos a encontrar❔❔❔❔ who know
