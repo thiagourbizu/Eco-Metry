@@ -268,6 +268,14 @@
     (uuid e0f661c0-8fa8-41d3-a708-9db865c88088)
   )
 
+  (global_label "GND" (shape input) (at 130.81 90.17 270) (fields_autoplaced)
+    (effects (font (size 1.27 1.27)) (justify right))
+    (uuid 9793f033-581f-4934-ae02-17b2d2d83912)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 130.81 96.9463 90)
+      (effects (font (size 1.27 1.27)) (justify right) hide)
+    )
+  )
+
   (symbol (lib_id "Sensor_Temperature:LM35-LP") (at 130.81 82.55 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4b9a3a51-2dcc-4e3b-bb37-b871145a5907)
@@ -311,8 +319,8 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 7c29b98c-bb4c-4081-b8ed-00accda8801d))
-    (pin "3" (uuid 25e8660b-e29d-4df8-a56f-450ca358670c))
     (pin "2" (uuid fdc3bc15-f6ac-44e0-82be-11e8b1a2d673))
+    (pin "3" (uuid 25e8660b-e29d-4df8-a56f-450ca358670c))
     (instances
       (project "Velocimetro"
         (path "/b4acc544-7fd6-49c8-ada6-a9c45f804c4a"
