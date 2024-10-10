@@ -1,0 +1,10 @@
+meti cambios de alto valor
+hay que:
+-agregar la huella buena a las resistencias
+-agregar pines hembra al ACS712 y si se quiere al TEMP
+
+no se me ocurre mas nada
+verificar todo
+
+
+10/10/2024
