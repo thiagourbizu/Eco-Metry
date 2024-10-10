@@ -18,6 +18,8 @@
 char txpacket[BUFFER_SIZE];
 char rxpacket[BUFFER_SIZE];
 
+HardwareSerial BTserial(1); // UART1 para el HC-05
+
 static RadioEvents_t RadioEvents;
 
 bool lora_idle = true;
@@ -35,6 +37,9 @@ const long interval = 100; // 100ms
 void setup() {
     Serial.begin(115200);
 
+    // Inicializa el puerto serie para la comunicación con el HC-05
+    BTserial.begin(115200);
+    
     pinMode(PinA, INPUT);
     pinMode(PinV, INPUT);
     pinMode(PinT, INPUT);
@@ -63,6 +68,12 @@ void loop() {
         float velocidad = Velocidad();
         float temperature = Temperature();
 
+        // Serial.println(temperatureC,hola);
+        String cadena = String(temperature) + "," + String(velocidad) + "," +  String(voltaje) + "," + String(current);
+        // Enviar el dato leído a través del módulo Bluetooth
+
+        BTserial.print(cadena);
+        
         // Formatear la cadena de datos
         sprintf(txpacket, "%.2f,%.2f,%.2f,%.2f", temperature, velocidad, voltaje, current);
         Serial.printf("\r\nEnviando paquete \"%s\" , longitud %d\r\n", txpacket, strlen(txpacket));
