@@ -18,15 +18,16 @@ void loop() {
   // Leer el valor del sensor de temperatura
   //int sensorValue = analogRead(sensorPin); // Lee el valor del sensor (0-1023)
   //temperatureC = sensorValue * (5.0 / 1023.0) * 100.0; // Convierte el valor a grados Celsius
-  int temperatureC = 100;
+  float lectura = analogRead(1);
+  float voltaje = lectura * (3.3 / 4095.0);
+  float temp = voltaje * 100.0;
   int velocidad = 100;
-  int voltaje = 1;
   int amperaje = 2;
   //int roundedTempC = round(temperatureC);
 
   // También mostrar la temperatura en el monitor serial
  // Serial.println(temperatureC,hola);
-  String cadena = String(temperatureC) + "," + String(velocidad) + "," +  String(voltaje) + "," + String(amperaje);
+  String cadena = String(lectura) + "," +  String(voltaje) + "," + String(temp);
   // Enviar el dato leído a través del módulo Bluetooth
   Serial.println(cadena);
 

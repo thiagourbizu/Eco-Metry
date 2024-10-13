@@ -1,4 +1,4 @@
-// Definimos el pin donde conectaremos el sensor Hall
+rue// Definimos el pin donde conectaremos el sensor Hall
 const int hallSensorPin = GPIO9;  // Pin analógico para el sensor
 
 // Variables para contar las veces que pasa el imán
@@ -41,11 +41,6 @@ void loop() {
       if(digitalRead(GPIO9) == HIGH)
         break;
     }
-    
-    // Imprimimos que se ha detectado el imán
-    Serial.print("Detección! El imán ha pasado ");
-    Serial.print(contadorRevoluciones);
-    Serial.println(" veces.");
   }
   
   // Verificamos si ha pasado un minuto (60,000 ms)

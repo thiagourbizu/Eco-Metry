@@ -10,14 +10,19 @@
 
 #include "LoRaWan_APP.h"
 #include "Arduino.h"
+// Temp
+#include <DHT.h> 
 
+
+// Bluetooth
+HardwareSerial BTserial(1);
 /*
  * set LoraWan_RGB to 1, the RGB active in loraWan
  * RGB red means sending;
  * RGB green means received done;
  */
 #ifndef LoraWan_RGB
-#define LoraWan_RGB 0
+#define LoraWan_RGB 1
 #endif
 
 #define RF_FREQUENCY 915000000 // Hz
@@ -41,6 +46,9 @@
 #define RX_TIMEOUT_VALUE 1000
 #define BUFFER_SIZE 50 // Increase buffer size to accommodate larger payload
 
+// Declaramos los baudios
+#define BAUD_RATE 115200
+
 char txpacket[BUFFER_SIZE];
 char rxpacket[BUFFER_SIZE];
 
@@ -49,23 +57,44 @@ static RadioEvents_t RadioEvents;
 bool lora_idle = true;
 
 // Definicion de pines
-int PinA = 0;
-int PinV = 2;
-int PinT = 1;
+#define PinA 1
+#define PinV 2
+#define PinT 0
+
+// Temperature Settings
+#define DHTTYPE DHT11
+#define DHTPIN GPIO8
+
+// Inicializamos
+DHT dht(DHTPIN, DHTTYPE);
+
+// Definimos el pin donde conectaremos el sensor Hall
 const int hallSensorPin = GPIO9;
 
+// Variables para contar!
+int contador = 0;
+int flag=0;
+
+// Variables para contar las veces que pasa el imán
+int contadorRevoluciones = 0;  // Contador que se reinicia cada minuto para calcular las RPM
+
+// Variable de iteraciones de ambos Promedios
+#define iteracionesPromedio 150
+
+// Variable para manejar el tiempo de la última detección
+unsigned long tiempoInicioSegundos = 0;
+unsigned long tiempoInicioMinuto = 0;  // Para medir un minuto
+
 void setup() {
-    Serial.begin(115200);
+    Serial.begin(BAUD_RATE);
+    BTserial.begin(BAUD_RATE);
+    dht.begin();
     
+    // Pinmodes
     pinMode(PinA, INPUT);
     pinMode(PinV, INPUT);
     pinMode(PinT, INPUT);
-    
     pinMode(hallSensorPin, INPUT);
-
-
-    // Guardamos el tiempo de inicio
-    unsigned long int tiempoInicioMinuto = millis();
     
     //Serial.println("Test");
 
@@ -76,95 +105,124 @@ void setup() {
     Radio.SetTxConfig(MODEM_LORA, TX_OUTPUT_POWER, 0, LORA_BANDWIDTH,
                       LORA_SPREADING_FACTOR, LORA_CODINGRATE,
                       LORA_PREAMBLE_LENGTH, LORA_FIX_LENGTH_PAYLOAD_ON,
-                      true, 0, 0, LORA_IQ_INVERSION_ON, 3000);
+                      true, 0, 0, LORA_IQ_INVERSION_ON, 3000);           
 }
 void loop() {
-    Current();
-    Voltaje();
-    Velocidad();
-    Temperature();
+    // Current ------------------------------------
+    float LecturaA=0;
+    float PromedioA = 0;
+    float LecturaA_1;
+    float current=0;
+    for (int i=0;i<=iteracionesPromedio;i++)
+    {
+       LecturaA = analogRead(PinA) * (3.3/4095);
+       LecturaA_1 = (LecturaA - 2.24303144561052336669604301278013736) / 0.1;
+       PromedioA += LecturaA_1;
+       // 100 vueltas...
+    }
+    // Promedio
+    current=PromedioA/iteracionesPromedio;
     
-    if (lora_idle) {
-        delay(100);
+    // Volts ------------------------------------
+    float LecturaV = analogRead(PinV) * (3.3/4095);   
+    float R1 = 15600000; // resistencia R1 en ohm
+    float R2 = 1000000;  // resistencia R2 en ohm
+
+    // Calculo
+    float voltaje = LecturaV * (R1 + R2) / R2; 
+    
+    // Velocidad ------------------------------------
+    int lectura = digitalRead(hallSensorPin);
+    
+    // Tiempo actual
+    unsigned long tiempoActual = millis();
+
+    // Levantamos la FLAG
+    if (digitalRead(GPIO9) == HIGH)
+      flag=0;
+      
+    //Serial.println(flag);
+    
+    // Si pasa el IMAN
+    if (lectura == LOW && flag == 0) 
+    {
+      // Incrementamos el contador de revoluciones
+      contadorRevoluciones++;
+    
+      while(true)
+      {
+        contador++;
+        //Serial.println("Entro al while");
+        //Serial.println(contador);
+        if ((digitalRead(GPIO9) == HIGH ) || (contador > 5))// No tocar
+        {
+          contador=0;
+          flag=1; // Levanto bandera para que no vuelva a hacerlo!
+          contadorRevoluciones-1;
+          //Serial.println("Salio del while");
+          //Serial.println(contador);
+          break;
+        }
+      }
+    }
+  
+    // Verificamos si ha pasado un minuto (60,000 ms)
+    if (tiempoActual - tiempoInicioMinuto >= 60000) 
+    {
+      // Calculamos las RPM (revoluciones por minuto)
+      int rpm = contadorRevoluciones;
+      
+      // Imprimimos las RPM
+      //Serial.print("Revoluciones por minuto (RPM): ");
+      //Serial.println(rpm);
+      // Reiniciamos el contador de revoluciones y el tiempo de inicio del minuto
+      contadorRevoluciones = 0;
+      tiempoInicioMinuto = tiempoActual;
+    }
+
+    // Temperature ------------------------------------
+    float humidity = dht.readHumidity();
+    float temperature = dht.readTemperature();
+
+    if(isnan(humidity) || isnan(temperature))
+    {
+      Serial.println("Error 404.");
+      return;
+    }
+    
+    // Transmisión cada X ms
+    if (tiempoActual - tiempoInicioSegundos >= 150) 
+    {
+      tiempoInicioSegundos = tiempoActual;
+      if (lora_idle) 
+      {
         // Formatea la cadena con 4 valores
-        sprintf(txpacket,"%.2f,%.2f,%.2f,%.2f", temperature, velocidad, voltaje, current);
-        Serial.printf("\r\nsending packet \"%s\" , length %d\r\n", txpacket, strlen(txpacket));
+        sprintf(txpacket,"%.2f,%.2f,%.2f,%.2f", temperature, humidity, contadorRevoluciones, voltaje, current);
+        //Serial.printf("\r\nsending packet \"%s\" , length %d\r\n", txpacket, strlen(txpacket));
         turnOnRGB(COLOR_SEND, 0); // Cambia el color del RGB
         Radio.Send((uint8_t *)txpacket, strlen(txpacket)); // Envía el paquete
         lora_idle = false;
+
+        
+        String cadena = String(temperature) + "," + String(humidity) + "," + String(contadorRevoluciones) + "," +  String(voltaje) + "," + String(current);  
+        // Enviar el dato leído a través del módulo Bluetooth
+        //BTserial.print(cadena);
+        Serial.println(cadena);
+        
+      }
     }
+    
 }
  
 void OnTxDone(void) {
     turnOffRGB();
-    Serial.println("TX done......");
+    //Serial.println("TX done......");
     lora_idle = true;
 }
 
 void OnTxTimeout(void) {
     turnOffRGB();
     Radio.Sleep();
-    Serial.println("TX Timeout......");
+    //Serial.println("TX Timeout......");
     lora_idle = true;
-}
-void Current(){
-    // Current
-    int LecturaA = analogRead(PinA) * (3.3/4095);
-    float Current = (LecturaA - 2.24303144561052336669604301278013736) / 0.1;
-    return Current;
-}
-void Voltaje(){
-    // Volts
-    int LecturaV = analogRead(PinV) * (3.3/4095);   
-    int R1 = 18600000;
-    int R2 = 1000000;
-    float Volts = LecturaV * (R2/(R1+R2));
-    return Volts;
-}
-void Velocidad(){
-  // Variables para contar las veces que pasa el imán
-  int contadorRevoluciones = 0;  // Contador que se reinicia cada minuto para calcular las RPM
-
-  // Variable para manejar el tiempo de la última detección
-  unsigned long ultimoTiempo = 0;
-  unsigned long tiempoInicioMinuto = 0;  // Para medir un minuto
-
-  int lectura = digitalRead(hallSensorPin);
-  
-  // Obtener el tiempo actual
-  unsigned long tiempoActual = millis();
-
-  // Si pasa el IMAN
-  if (lectura == LOW) 
-  {
-    // Incrementamos el contador de revoluciones
-    contadorRevoluciones++;
-    
-    // Actualizamos el tiempo de la última detección
-    ultimoTiempo = tiempoActual;
-    while(true)
-    {
-      //Serial.println(".");
-      if(digitalRead(GPIO9) == HIGH)
-        break;
-    }
-    
-  }
-  
-  // Verificamos si ha pasado un minuto (60,000 ms)
-  if (tiempoActual - tiempoInicioMinuto >= 60000) 
-  {
-    // Calculamos las RPM (revoluciones por minuto)
-    int rpm = contadorRevoluciones;
-    
-    // Imprimimos las RPM
-    Serial.print("Revoluciones por minuto (RPM): ");
-    Serial.println(rpm);
-    // Reiniciamos el contador de revoluciones y el tiempo de inicio del minuto
-    contadorRevoluciones = 0;
-    tiempoInicioMinuto = tiempoActual;
-  }
-}
-void Temperature(){
-  float Temperature = analogRead(PinT);     
 }
