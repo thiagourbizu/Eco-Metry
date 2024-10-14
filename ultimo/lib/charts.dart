@@ -12,7 +12,7 @@ class ChartsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          chartType == 'temperature' ? 'Gráfico de Temperatura' : 'Gráfico de Velocidad',
+          chartType == 'temperature' ? 'Gráfico de Temperatura' : 'Gráfico de elocidad',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color.fromARGB(255, 78, 161, 202),

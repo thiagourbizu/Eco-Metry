@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async'; // Importación necesaria para StreamSubscription
 import 'connection_screen.dart'; // Importar la pantalla de conexión
@@ -81,7 +82,8 @@ class _BluetoothAppState extends State<BluetoothApp> {
       _discoveryStream!.cancel(); // Cancelar el stream de descubrimiento
       setState(() {
         _isDiscovering = false;
-        _devicesList.clear(); // Limpiar la lista de dispositivos si es necesario
+        _devicesList
+            .clear(); // Limpiar la lista de dispositivos si es necesario
       });
     }
   }
@@ -96,7 +98,8 @@ class _BluetoothAppState extends State<BluetoothApp> {
   }
 
   Future<void> _openGitHub() async {
-    final url = 'https://github.com/thiagourbizu/Eco-Metry/tree/main/ultimo/lib';
+    final url =
+        'https://github.com/thiagourbizu/Eco-Metry/tree/main/ultimo/lib';
     try {
       await FlutterWebBrowser.openWebPage(url: url);
     } catch (e) {
@@ -118,7 +121,9 @@ class _BluetoothAppState extends State<BluetoothApp> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ConnectionScreen(device: fakeDevice),
+        builder: (context) => ConnectionScreen(
+          device: fakeDevice,
+        ),
       ),
     );
   }
@@ -198,18 +203,23 @@ class _BluetoothAppState extends State<BluetoothApp> {
                     itemBuilder: (context, index) {
                       BluetoothDiscoveryResult result = _devicesList[index];
                       return ListTile(
-                        tileColor: Colors.blueGrey[900], // Fondo de cada ítem en la lista
+                        tileColor: Colors
+                            .blueGrey[900], // Fondo de cada ítem en la lista
                         title: Text(
                           result.device.name ?? "Unknown Device",
-                          style: TextStyle(color: Colors.white), // Texto en blanco
+                          style:
+                              TextStyle(color: Colors.white), // Texto en blanco
                         ),
                         subtitle: Text(
                           result.device.address.toString(),
-                          style: TextStyle(color: Colors.grey[300]), // Texto secundario en gris claro
+                          style: TextStyle(
+                              color: Colors
+                                  .grey[300]), // Texto secundario en gris claro
                         ),
                         trailing: Text(
                           result.rssi.toString(),
-                          style: TextStyle(color: Colors.white), // Texto en blanco
+                          style:
+                              TextStyle(color: Colors.white), // Texto en blanco
                         ),
                         onTap: () {
                           _connectToDevice(result.device);
@@ -218,25 +228,48 @@ class _BluetoothAppState extends State<BluetoothApp> {
                     },
                   ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: _connectToFakeDevice, // Simula conexión a un dispositivo inexistente
-              child: Text("Conectar a dispositivo inexistente"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueGrey[700], // Color de fondo
-                foregroundColor: Colors.white, // Color del texto
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: _openGitHub, // Abre el enlace de GitHub
-              child: Text("Abrir Github"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueGrey[700], // Color de fondo
-                foregroundColor: Colors.white, // Color del texto
+          Expanded(
+            child: Container(
+              alignment:
+                  Alignment.bottomCenter, // Alinea los botones a la derecha
+              padding: const EdgeInsets.only(bottom: 40.0), // Espaciado desde el fondo
+              child: Row(
+                mainAxisSize: MainAxisSize.min, // Ajusta el tamaño del Row
+                children: [
+                  // Botón para conectar a dispositivo inexistente
+                  ElevatedButton(
+                    onPressed:
+                        _connectToFakeDevice, // Simula conexión a un dispositivo inexistente
+                    child: Icon(
+                      Icons.devices_other, // Ícono relevante para la conexión
+                      color: Colors.white,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueGrey[700], // Color de fondo
+                      foregroundColor: Colors.white, // Color del texto
+                    ),
+                  ),
+                  SizedBox(width: 16), // Espacio entre los botones
+                  // Botón para abrir GitHub
+                  ElevatedButton(
+                    onPressed: _openGitHub, // Abre el enlace de GitHub
+                    child: Row(
+                      mainAxisSize:
+                          MainAxisSize.min, // Ajusta el tamaño del botón
+                      children: [
+                        FaIcon(
+                          FontAwesomeIcons
+                              .github, // Ícono de GitHub de Font Awesome
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueGrey[700], // Color de fondo
+                      foregroundColor: Colors.white, // Color del texto
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
