@@ -7,12 +7,32 @@ class ChartsScreen extends StatelessWidget {
 
   ChartsScreen({required this.data, required this.chartType});
 
+  // Función para obtener el título del gráfico según el tipo de variable
+  String getTituloGrafico(String chartType) {
+    switch (chartType) {
+      case 'temperature':
+        return 'Gráfico de Temperatura';
+      case 'humidity':
+        return 'Gráfico de Humedad';
+      case 'voltage':
+        return 'Gráfico de Voltaje';
+      case 'current':
+        return 'Gráfico de Corriente';
+      case 'speed':
+        return 'Gráfico de Velocidad';
+      case 'rpm':
+        return 'Gráfico de RPM';
+      default:
+        return 'Gráfico Desconocido';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          chartType == 'temperature' ? 'Gráfico de Temperatura' : 'Gráfico de elocidad',
+          getTituloGrafico(chartType), // Se utiliza la función para obtener el título
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color.fromARGB(255, 78, 161, 202),

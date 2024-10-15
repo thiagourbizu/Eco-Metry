@@ -21,15 +21,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _loadSettings() async {
-    try {
-      final settings = SettingsManager();
+    final settings = SettingsManager();
+    await settings.init(); // Asegúrate de inicializar
+    setState(() {
       _temperatureController.text = settings.temperatureMax;
       _speedController.text = settings.speedMax;
       _voltageController.text = settings.voltageMax;
       _amperageController.text = settings.amperageMax;
-    } catch (e) {
-      print('Error loading settings: $e');
-    }
+    });
   }
 
   Future<void> _saveSettings() async {

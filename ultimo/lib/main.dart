@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'bluetooth_app.dart';
+import 'settings_manager.dart'; // Asegúrate de importar el SettingsManager
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter(); // Inicializa Hive
+  final settingsManager = SettingsManager();
+  await settingsManager.init(); // Inicializa SettingsManager
 
   runApp(MyApp());
 }
@@ -16,9 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Eco-Metry',
       theme: ThemeData(
-        // No se especifica una fuente personalizada
         textTheme: Theme.of(context).textTheme,
-        // Asegúrate de que no haya otras configuraciones de fuente aquí
       ),
       home: BluetoothApp(),
     );

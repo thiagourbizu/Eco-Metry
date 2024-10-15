@@ -82,7 +82,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   List<double> voltageData = [];
   List<double> currentData = [];
   List<double> rpmData = [];
-  List<double> humedadData = [];
+  List<double> humidityData = [];
   List<String> receivedLines = [];
   bool isConnecting = true;
   double currentTemperature = 0.0;
@@ -148,30 +148,30 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
             }
             temperatureData.add(currentTemperature);
 
-            if (speedData.length >= 30) {
+            if (speedData.length >= 40) {
               speedData.removeAt(0);
             }
             speedData.add(currentSpeed);
 
-            if (voltageData.length >= 30) {
+            if (voltageData.length >= 40) {
               voltageData.removeAt(0);
             }
             voltageData.add(currentVoltage);
 
-            if (currentData.length >= 30) {
+            if (currentData.length >= 40) {
               currentData.removeAt(0);
             }
             currentData.add(currentCurrent);
 
-            if (rpmData.length >= 30) {
+            if (rpmData.length >= 40) {
               rpmData.removeAt(0);
             }
             rpmData.add(currentRPM);
 
-            if (humedadData.length >= 50) {
-              humedadData.removeAt(0);
+            if (humidityData.length >= 40) {
+              humidityData.removeAt(0);
             }
-            humedadData.add(currentHumedad);
+            humidityData.add(currentHumedad);
           }
         });
       }).onDone(() {
@@ -230,14 +230,19 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
       case 'temperature':
         dataToPass = List.from(temperatureData);
         break;
-      case 'speed':
-        dataToPass = List.from(speedData);
-        break;
+      case 'humidity':
+        dataToPass = List.from(humidityData);
       case 'voltage':
         dataToPass = List.from(voltageData);
         break;
       case 'current':
         dataToPass = List.from(currentData);
+        break;
+      case 'rpm':
+        dataToPass = List.from(rpmData);
+        break;
+      case 'speed':
+        dataToPass = List.from(speedData);
         break;
       default:
         dataToPass = [];
@@ -516,7 +521,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                     child: AspectRatio(
                       aspectRatio: 1.0,
                       child: GestureDetector(
-                        onTap: () => _navigateToChart('speed'),
+                        onTap: () => _navigateToChart('humidity'),
                         child: Container(
                           padding: EdgeInsets.all(16.0),
                           decoration: BoxDecoration(
@@ -539,7 +544,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Velocidad',
+                                'Humedad',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 24,
@@ -548,7 +553,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                               ),
                               SizedBox(height: 10),
                               Text(
-                                '${currentSpeed.toStringAsFixed(1)} km/h',
+                                '${currentHumedad.toStringAsFixed(1)} %',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 32,
@@ -672,7 +677,56 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                     child: AspectRatio(
                       aspectRatio: 1.0,
                       child: GestureDetector(
-                        onTap: () => _navigateToChart('voltage'),
+                        onTap: () => _navigateToChart('speed'),
+                        child: Container(
+                          padding: EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: Color.fromARGB(255, 26, 60, 79),
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: Colors.grey,
+                              width: 2.0,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                spreadRadius: 2,
+                                blurRadius: 8,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Velocidad',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                '${currentSpeed.toStringAsFixed(0)} km/h',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: AspectRatio(
+                      aspectRatio: 1.0,
+                      child: GestureDetector(
+                        onTap: () => _navigateToChart('rpm'),
                         child: Container(
                           padding: EdgeInsets.all(16.0),
                           decoration: BoxDecoration(
@@ -704,56 +758,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                               ),
                               SizedBox(height: 10),
                               Text(
-                                '${currentRPM.toStringAsFixed(0)} ',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 32,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: AspectRatio(
-                      aspectRatio: 1.0,
-                      child: GestureDetector(
-                        onTap: () => _navigateToChart('current'),
-                        child: Container(
-                          padding: EdgeInsets.all(16.0),
-                          decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 26, 60, 79),
-                            borderRadius: BorderRadius.circular(12.0),
-                            border: Border.all(
-                              color: Colors.grey,
-                              width: 2.0,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                spreadRadius: 2,
-                                blurRadius: 8,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Humedad',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                '${currentHumedad.toStringAsFixed(1)} ',
+                                '${currentRPM.toStringAsFixed(1)} ',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 32,

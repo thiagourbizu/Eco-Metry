@@ -69,11 +69,13 @@ bool lora_idle = true;
 DHT dht(DHTPIN, DHTTYPE);
 
 // Definimos el pin donde conectaremos el sensor Hall
-const int hallSensorPin = GPIO9;
+#define hallSensorPin GPIO9;
 
 // Variables para contar!
 int contador = 0;
 int flag=0;
+
+float velocidad = 0;
 
 // Variables para contar las veces que pasa el imán
 int contadorRevoluciones = 0;  // Contador que se reinicia cada minuto para calcular las RPM
@@ -132,19 +134,18 @@ void loop() {
     float voltaje = LecturaV * (R1 + R2) / R2; 
     
     // Velocidad ------------------------------------
-    int lectura = digitalRead(hallSensorPin);
-    
+  
     // Tiempo actual
     unsigned long tiempoActual = millis();
 
     // Levantamos la FLAG
-    if (digitalRead(GPIO9) == HIGH)
+    if (digitalRead(hallSensorPin) == HIGH)
       flag=0;
       
     //Serial.println(flag);
     
     // Si pasa el IMAN
-    if (lectura == LOW && flag == 0) 
+    if (digitalRead(hallSensorPin) == LOW && flag == 0) 
     {
       // Incrementamos el contador de revoluciones
       contadorRevoluciones++;
@@ -154,7 +155,7 @@ void loop() {
         contador++;
         //Serial.println("Entro al while");
         //Serial.println(contador);
-        if ((digitalRead(GPIO9) == HIGH ) || (contador > 5))// No tocar
+        if ((digitalRead(hallSensorPin) == HIGH ) || (contador > 5))// No tocar
         {
           contador=0;
           flag=1; // Levanto bandera para que no vuelva a hacerlo!
@@ -190,6 +191,8 @@ void loop() {
       return;
     }
     
+    velocidad+0.01;
+    
     // Transmisión cada X ms
     if (tiempoActual - tiempoInicioSegundos >= 150) 
     {
@@ -197,14 +200,14 @@ void loop() {
       if (lora_idle) 
       {
         // Formatea la cadena con 4 valores
-        sprintf(txpacket,"%.2f,%.2f,%.2f,%.2f", temperature, humidity, contadorRevoluciones, voltaje, current);
+        sprintf(txpacket,"%.2f,%d,%d,%.2f,%.2f,%.2f", temperature, humidity, contadorRevoluciones, voltaje, current, velocidad);
         //Serial.printf("\r\nsending packet \"%s\" , length %d\r\n", txpacket, strlen(txpacket));
         turnOnRGB(COLOR_SEND, 0); // Cambia el color del RGB
         Radio.Send((uint8_t *)txpacket, strlen(txpacket)); // Envía el paquete
         lora_idle = false;
-
+         
         
-        String cadena = String(temperature) + "," + String(humidity) + "," + String(contadorRevoluciones) + "," +  String(voltaje) + "," + String(current);  
+        String cadena = String(temperature) + "," + String(humidity) + "," + String(contadorRevoluciones) + "," +  String(voltaje) + "," + String(current) + "," + String(velocidad);  
         // Enviar el dato leído a través del módulo Bluetooth
         //BTserial.print(cadena);
         Serial.println(cadena);
