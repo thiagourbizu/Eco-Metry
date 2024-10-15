@@ -45,6 +45,9 @@ def juego_spy():
             
             for i in range(75):
                 print("#")
+		
+
+        input("Pulsa ENTER")
 
 # Ejecutar el juego
 juego_spy()
