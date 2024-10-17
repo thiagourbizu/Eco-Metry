@@ -69,7 +69,7 @@ bool lora_idle = true;
 DHT dht(DHTPIN, DHTTYPE);
 
 // Definimos el pin donde conectaremos el sensor Hall
-#define hallSensorPin GPIO9;
+#define hallSensorPin GPIO9
 
 // Variables para contar!
 int contador = 0;
