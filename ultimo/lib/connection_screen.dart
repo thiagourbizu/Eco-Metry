@@ -22,6 +22,10 @@ Widget _buildDataContainer(
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: Colors.grey,
+          width: 2.0,
+        ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -56,15 +60,15 @@ Widget _buildDataContainer(
   );
 }
 
-Color colorA = Color.fromARGB(255, 153, 9, 182);
-Color colorT = Colors.orange;
-Color colorVel = Colors.blue;
-Color colorVolt = Colors.green;
+Color colorA = Color.fromARGB(255, 26, 60, 79);
+Color colorT = Color.fromARGB(255, 26, 60, 79);
+Color colorVel = Color.fromARGB(255, 26, 60, 79);
+Color colorVolt = Color.fromARGB(255, 26, 60, 79);
 
-Color bordeA = Color.fromARGB(255, 54, 1, 65);
-Color bordeT = const Color.fromARGB(255, 170, 103, 3);
-Color bordeVel = const Color.fromARGB(255, 1, 67, 121);
-Color bordeVolt = const Color.fromARGB(255, 2, 102, 5);
+Color bordeA = Colors.grey;
+Color bordeT = Colors.grey;
+Color bordeVel = Colors.grey;
+Color bordeVolt = Colors.grey;
 
 class ConnectionScreen extends StatefulWidget {
   final BluetoothDevice device;
@@ -669,7 +673,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                   ),
                 ],
               ),
-              
+
               SizedBox(height: 16),
               Row(
                 children: [

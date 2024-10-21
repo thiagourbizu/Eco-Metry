@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'dart:async'; // Importación necesaria para StreamSubscription
-import 'connection_screen.dart'; // Importar la pantalla de conexión
-import 'package:flutter_web_browser/flutter_web_browser.dart'; // Nuevo import
-import 'settings_screen.dart'; // Asegúrate de importar el archivo
+import 'dart:async';
+import 'connection_screen.dart';
+import 'package:flutter_web_browser/flutter_web_browser.dart';
+import 'settings_screen.dart';
 
 class BluetoothApp extends StatefulWidget {
   @override
@@ -59,11 +59,15 @@ class _BluetoothAppState extends State<BluetoothApp> {
       _isDiscovering = true;
     });
 
-    _discoveryStream =
-        FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
-      setState(() {
-        _devicesList.add(r);
-      });
+    _discoveryStream = FlutterBluetoothSerial.instance.startDiscovery().listen((result) {
+      String? deviceName = result.device.name;
+      if (deviceName != null && deviceName.contains('Eco')) {
+        setState(() {
+          if (!_devicesList.any((element) => element.device.address == result.device.address)) {
+            _devicesList.add(result);
+          }
+        });
+      }
     }, onDone: () {
       setState(() {
         _isDiscovering = false;
@@ -71,7 +75,7 @@ class _BluetoothAppState extends State<BluetoothApp> {
 
       if (_devicesList.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("No se encontraron dispositivos")),
+          SnackBar(content: Text("No se encontraron dispositivos Eco-Metry")),
         );
       }
     });
@@ -79,11 +83,10 @@ class _BluetoothAppState extends State<BluetoothApp> {
 
   void _stopDiscovery() {
     if (_discoveryStream != null) {
-      _discoveryStream!.cancel(); // Cancelar el stream de descubrimiento
+      _discoveryStream!.cancel();
       setState(() {
         _isDiscovering = false;
-        _devicesList
-            .clear(); // Limpiar la lista de dispositivos si es necesario
+        _devicesList.clear();
       });
     }
   }
@@ -98,8 +101,7 @@ class _BluetoothAppState extends State<BluetoothApp> {
   }
 
   Future<void> _openGitHub() async {
-    final url =
-        'https://github.com/thiagourbizu/Eco-Metry/tree/main/ultimo/lib';
+    final url = 'https://github.com/thiagourbizu/Eco-Metry/tree/main/ultimo/lib';
     try {
       await FlutterWebBrowser.openWebPage(url: url);
     } catch (e) {
@@ -107,9 +109,7 @@ class _BluetoothAppState extends State<BluetoothApp> {
     }
   }
 
-  // Método para simular conexión a un dispositivo inexistente
   void _connectToFakeDevice() {
-    // Crea un dispositivo ficticio
     BluetoothDevice fakeDevice = BluetoothDevice(
       name: "Dispositivo Inexistente",
       address: "00:00:00:00:00:00",
@@ -117,13 +117,10 @@ class _BluetoothAppState extends State<BluetoothApp> {
       bondState: BluetoothBondState.bonded,
     );
 
-    // Navega a la pantalla de conexión con el dispositivo ficticio
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ConnectionScreen(
-          device: fakeDevice,
-        ),
+        builder: (context) => ConnectionScreen(device: fakeDevice),
       ),
     );
   }
@@ -131,7 +128,7 @@ class _BluetoothAppState extends State<BluetoothApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueGrey[900], // Fondo azul oscuro
+      backgroundColor: Colors.blueGrey[900],
       appBar: AppBar(
         title: GestureDetector(
           onTap: () {
@@ -145,16 +142,13 @@ class _BluetoothAppState extends State<BluetoothApp> {
             style: TextStyle(color: Colors.white),
           ),
         ),
-        backgroundColor: const Color.fromARGB(
-            255, 78, 161, 202), // Color de fondo del AppBar
+        backgroundColor: const Color.fromARGB(255, 78, 161, 202),
         actions: [
           Row(
             children: [
-              // Cuadrado blanco para detener la búsqueda
               Container(
                 child: IconButton(
-                  icon: Icon(_isDiscovering ? Icons.stop : Icons.play_arrow,
-                      color: Colors.white),
+                  icon: Icon(_isDiscovering ? Icons.stop : Icons.play_arrow, color: Colors.white),
                   onPressed: () {
                     if (_isDiscovering) {
                       _stopDiscovery();
@@ -166,13 +160,12 @@ class _BluetoothAppState extends State<BluetoothApp> {
                   constraints: BoxConstraints(),
                 ),
               ),
-              // Indicador de carga o botón de actualización
               if (_isDiscovering)
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.0),
                   child: SizedBox(
-                    width: 23.0, // Ajusta el tamaño según tus necesidades
-                    height: 23.0, // Ajusta el tamaño según tus necesidades
+                    width: 23.0,
+                    height: 23.0,
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
@@ -195,7 +188,7 @@ class _BluetoothAppState extends State<BluetoothApp> {
                 ? Center(
                     child: Text(
                       "No hay dispositivos encontrados",
-                      style: TextStyle(color: Colors.white), // Texto en blanco
+                      style: TextStyle(color: Colors.white),
                     ),
                   )
                 : ListView.builder(
@@ -203,23 +196,18 @@ class _BluetoothAppState extends State<BluetoothApp> {
                     itemBuilder: (context, index) {
                       BluetoothDiscoveryResult result = _devicesList[index];
                       return ListTile(
-                        tileColor: Colors
-                            .blueGrey[900], // Fondo de cada ítem en la lista
+                        tileColor: Colors.blueGrey[900],
                         title: Text(
                           result.device.name ?? "Unknown Device",
-                          style:
-                              TextStyle(color: Colors.white), // Texto en blanco
+                          style: TextStyle(color: Colors.white),
                         ),
                         subtitle: Text(
                           result.device.address.toString(),
-                          style: TextStyle(
-                              color: Colors
-                                  .grey[300]), // Texto secundario en gris claro
+                          style: TextStyle(color: Colors.grey[300]),
                         ),
                         trailing: Text(
                           result.rssi.toString(),
-                          style:
-                              TextStyle(color: Colors.white), // Texto en blanco
+                          style: TextStyle(color: Colors.white),
                         ),
                         onTap: () {
                           _connectToDevice(result.device);
@@ -230,43 +218,55 @@ class _BluetoothAppState extends State<BluetoothApp> {
           ),
           Expanded(
             child: Container(
-              alignment:
-                  Alignment.bottomCenter, // Alinea los botones a la derecha
-              padding: const EdgeInsets.only(bottom: 40.0), // Espaciado desde el fondo
+              alignment: Alignment.bottomCenter,
+              padding: const EdgeInsets.only(bottom: 40.0),
               child: Row(
-                mainAxisSize: MainAxisSize.min, // Ajusta el tamaño del Row
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Botón para conectar a dispositivo inexistente
                   ElevatedButton(
-                    onPressed:
-                        _connectToFakeDevice, // Simula conexión a un dispositivo inexistente
+                    onPressed: _connectToFakeDevice,
                     child: Icon(
-                      Icons.devices_other, // Ícono relevante para la conexión
+                      Icons.devices_other,
                       color: Colors.white,
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueGrey[700], // Color de fondo
-                      foregroundColor: Colors.white, // Color del texto
+                      backgroundColor: Colors.blueGrey[700],
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                    ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SettingsScreen()),
+                      );
+                    },
+                    child: Icon(
+                      Icons.settings, // Ícono de engranaje
+                      color: Colors.white,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueGrey[700],
+                      foregroundColor: Colors.white,
                     ),
                   ),
                   SizedBox(width: 16), // Espacio entre los botones
-                  // Botón para abrir GitHub
-                  ElevatedButton(
-                    onPressed: _openGitHub, // Abre el enlace de GitHub
+                  // Botón para abrir la pantalla de configuración
+                ElevatedButton(
+                    onPressed: _openGitHub,
                     child: Row(
-                      mainAxisSize:
-                          MainAxisSize.min, // Ajusta el tamaño del botón
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         FaIcon(
-                          FontAwesomeIcons
-                              .github, // Ícono de GitHub de Font Awesome
+                          FontAwesomeIcons.github,
                           color: Colors.white,
                         ),
                       ],
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueGrey[700], // Color de fondo
-                      foregroundColor: Colors.white, // Color del texto
+                      backgroundColor: Colors.blueGrey[700],
+                      foregroundColor: Colors.white,
                     ),
                   ),
                 ],
