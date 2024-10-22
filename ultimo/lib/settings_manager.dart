@@ -12,7 +12,7 @@ class SettingsManager {
   }
 
   String get temperatureMax => _settingsBox?.get('temperature_max', defaultValue: '0') ?? '0';
-  String get speedMax => _settingsBox?.get('speed_max', defaultValue: '0') ?? '0';
+  String get humidityMax => _settingsBox?.get('humidity_max', defaultValue: '0') ?? '0';
   String get voltageMax => _settingsBox?.get('voltage_max', defaultValue: '0') ?? '0';
   String get amperageMax => _settingsBox?.get('amperage_max', defaultValue: '0') ?? '0';
 
@@ -20,8 +20,8 @@ class SettingsManager {
     await _settingsBox?.put('temperature_max', value);
   }
 
-  Future<void> setSpeedMax(String value) async {
-    await _settingsBox?.put('speed_max', value);
+  Future<void> setHumidityMax(String value) async {
+    await _settingsBox?.put('humidity_max', value);
   }
 
   Future<void> setVoltageMax(String value) async {

@@ -5,6 +5,7 @@ import 'charts.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'dart:async';
 import 'settings_manager.dart';
+import 'settings_screen.dart';
 //import 'package:kdgaugeview/kdgaugeview.dart';
 
 Widget _buildDataContainer(
@@ -17,8 +18,8 @@ Widget _buildDataContainer(
   return GestureDetector(
     //onTap: onTap,
     child: Container(
-      width: 150,
-      height: 150,
+      width: 120,
+      height: 120,
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(15),
@@ -33,12 +34,12 @@ Widget _buildDataContainer(
           Text(
             label,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 17,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 6),
           Text(
             value,
             style: TextStyle(
@@ -60,10 +61,6 @@ Widget _buildDataContainer(
   );
 }
 
-Color colorA = Color.fromARGB(255, 26, 60, 79);
-Color colorT = Color.fromARGB(255, 26, 60, 79);
-Color colorVel = Color.fromARGB(255, 26, 60, 79);
-Color colorVolt = Color.fromARGB(255, 26, 60, 79);
 
 Color bordeA = Colors.grey;
 Color bordeT = Colors.grey;
@@ -106,6 +103,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     _connectToDevice();
     _startSpeedometerUpdate(); // Iniciar actualización del velocímetro
   }
+  
 
   void _connectToDevice() async {
     try {
@@ -276,28 +274,72 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   Widget build(BuildContext context) {
     final orientation = MediaQuery.of(context).orientation;
 
+    Color colorT = double.parse(SettingsManager().temperatureMax) <= currentTemperature
+    ? const Color.fromARGB(255, 167, 35, 26) // Red if current temperature exceeds max
+    : const Color.fromARGB(255, 26, 60, 79); // Default color
+
+    Color colorH = double.parse(SettingsManager().humidityMax) <= currentHumedad
+    ? const Color.fromARGB(255, 167, 35, 26) // Red if current temperature exceeds max
+    : const Color.fromARGB(255, 26, 60, 79); // Default color
+
+    Color colorV = double.parse(SettingsManager().voltageMax) <= currentVoltage
+    ? const Color.fromARGB(255, 167, 35, 26) // Red if current temperature exceeds max
+    : const Color.fromARGB(255, 26, 60, 79); // Default color
+
+    Color colorA = double.parse(SettingsManager().amperageMax) <= currentCurrent
+    ? const Color.fromARGB(255, 167, 35, 26) // Red if current temperature exceeds max
+    : const Color.fromARGB(255, 26, 60, 79); // Default color
+
+    Color colorRPM = currentSpeed <= 5
+    ? const Color.fromARGB(255, 26, 60, 79) // Color predeterminado si la velocidad es <= 5 km/h
+    : currentSpeed <= 20
+        ? const Color.fromARGB(255, 0, 255, 0) // Verde si la velocidad es > 5 y <= 20 km/h
+        : currentSpeed <= 40
+            ? const Color.fromARGB(255, 255, 165, 0) // Naranja si la velocidad es > 20 y <= 40 km/h
+            : const Color.fromARGB(255, 167, 35, 26); // Rojo si la velocidad es > 40 km/h
+
+
+
     if (orientation == Orientation.landscape) {
       // Modo horizontal
       return Scaffold(
-        backgroundColor: Colors.blueGrey[900],
-        appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 78, 161, 202),
-          title: Text(
-            'Conectado a ${widget.device.name}',
-            style: TextStyle(color: Colors.white),
-          ),
-          iconTheme: IconThemeData(color: Colors.white),
+  backgroundColor: Colors.blueGrey[900],
+  appBar: AppBar(
+    backgroundColor: const Color.fromARGB(255, 78, 161, 202),
+    title: Text(
+      'Tablero',
+      style: TextStyle(color: Colors.white),
+    ),
+    iconTheme: IconThemeData(color: Colors.white),
+    actions: [
+      ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SettingsScreen()),
+          );
+        },
+        child: Icon(
+          Icons.settings, // Ícono de engranaje
+          color: Colors.white,
         ),
-        body: Center(
-          child: Row(
-            children: [
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color.fromARGB(255, 26, 79, 104),
+          foregroundColor: Colors.white,
+        ),
+      ),
+    ],
+  ),
+  body: Center(
+    child: Row(
+      children: [
               // Nuevo velocímetro a la izquierda con margen izquierdo
               Padding(
                 padding: const EdgeInsets.only(
-                    left: 75.0, top: 15.0), // Margen izquierdo
+                    left: 60.0, top: 15.0), // Margen izquierdo
                 child: Container(
-                  width: 310, // Tamaño del velocímetro
-                  height: 310, // Tamaño del velocímetro
+                  width: 250, // Tamaño del velocímetro
+                  height: 250, // Tamaño del velocímetro
                   child: TweenAnimationBuilder(
                     tween: Tween<double>(begin: 0.0, end: currentSpeed),
                     duration: const Duration(
@@ -327,19 +369,22 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                 RadialAxis(
                                   minimum: 0,
                                   maximum:
-                                      60, // Ajustado para un máximo de 60 km/h
+                                      60.2, // Ajustado para un máximo de 60 km/h
                                   ranges: <GaugeRange>[
                                     // Color verde
                                     GaugeRange(
                                       startValue: 0,
                                       endValue: value < 20 ? value : 20,
+                                       
                                       color: Colors.green,
+                                      
                                       startWidth: 20,
                                       endWidth: 20,
+                                      
                                     ),
                                     // Color naranja
                                     GaugeRange(
-                                      startValue: 20,
+                                      startValue: 21,
                                       endValue: value < 40 ? value : 40,
                                       color: Colors.orange,
                                       startWidth: 20,
@@ -347,7 +392,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                     ),
                                     // Color rojo
                                     GaugeRange(
-                                      startValue: 40,
+                                      startValue: 41,
                                       endValue: value < 60 ? value : 60,
                                       color: Colors.red,
                                       startWidth: 20,
@@ -412,33 +457,51 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
               // Reubicar los cuadros en modo horizontal
               Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _buildDataContainer(
-                          'Voltaje',
-                          currentVoltage.toStringAsFixed(2),
-                          'V',
-                          colorVolt,
-                          () => _navigateToChart('voltage'),
+                          'RPM',
+                          currentRPM.toStringAsFixed(2),
+                          '',
+                          colorRPM,
+                          () => _navigateToChart('rpm'),
+                        ),
+                        SizedBox(
+                          width: 22,
                         ),
                         _buildDataContainer(
-                          'Amperaje',
+                          'Temperatura',
+                          currentTemperature.toStringAsFixed(2),
+                          'ºC',
+                          colorT,
+                          () => _navigateToChart('temperature'),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildDataContainer(
+                          'Tensión',
+                          currentVoltage.toStringAsFixed(2),
+                          'V',
+                          colorV,
+                          () => _navigateToChart('voltage'),
+                        ),
+                        SizedBox(
+                          width: 22,
+                        ),
+                        _buildDataContainer(
+                          'Corriente',
                           currentCurrent.toStringAsFixed(2),
                           'A',
                           colorA,
                           () => _navigateToChart('current'),
                         ),
                       ],
-                    ),
-                    _buildDataContainer(
-                      'Temperatura',
-                      currentTemperature.toStringAsFixed(1),
-                      '°C',
-                      colorT,
-                      () => _navigateToChart('temperature'),
                     ),
                   ],
                 ),
@@ -450,20 +513,45 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     } else {
       // Modo vertical
       return Scaffold(
-        backgroundColor: Colors.blueGrey[900],
-        appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 78, 161, 202),
-          title: Text(
-            'Conectado a ${widget.device.name}',
-            style: TextStyle(color: Colors.white),
-          ),
-          iconTheme: IconThemeData(color: Colors.white),
+  backgroundColor: Colors.blueGrey[900],
+  appBar: AppBar(
+    backgroundColor: const Color.fromARGB(255, 78, 161, 202),
+    title: Text(
+      'Gráfico',
+      style: TextStyle(color: Colors.white),
+    ),
+    iconTheme: IconThemeData(color: Colors.white),
+    actions: [
+      IconButton(
+        icon: Icon(
+          Icons.insert_chart,
+          color: Colors.white,
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              if (isConnecting)
+        onPressed: _navigateToDataScreen,
+      ),
+      ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SettingsScreen()),
+          );
+        },
+        child: Icon(
+          Icons.settings, // Ícono de engranaje
+          color: Colors.white,
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color.fromARGB(255, 26, 79, 104),
+          foregroundColor: Colors.white,
+        ),
+      ),
+    ],
+  ),
+  body: Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(
+      children: [
+        if (isConnecting)
                 Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -480,7 +568,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         child: Container(
                           padding: EdgeInsets.all(16.0),
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 26, 60, 79),
+                            color: colorT,
                             borderRadius: BorderRadius.circular(12.0),
                             border: Border.all(
                               color: Colors.grey,
@@ -502,7 +590,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                 'Temperatura',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 24,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -529,7 +617,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         child: Container(
                           padding: EdgeInsets.all(16.0),
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 26, 60, 79),
+                            color: colorH,
                             borderRadius: BorderRadius.circular(12.0),
                             border: Border.all(
                               color: Colors.grey,
@@ -551,13 +639,13 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                 'Humedad',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 24,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               SizedBox(height: 10),
                               Text(
-                                '${currentHumedad.toStringAsFixed(1)} %',
+                                '${currentHumedad.toStringAsFixed(0)} %',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 32,
@@ -582,7 +670,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         child: Container(
                           padding: EdgeInsets.all(16.0),
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 26, 60, 79),
+                            color: colorV,
                             borderRadius: BorderRadius.circular(12.0),
                             border: Border.all(
                               color: Colors.grey,
@@ -601,10 +689,10 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Voltaje',
+                                'Tensión',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 24,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -631,7 +719,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         child: Container(
                           padding: EdgeInsets.all(16.0),
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 26, 60, 79),
+                            color: colorA,
                             borderRadius: BorderRadius.circular(12.0),
                             border: Border.all(
                               color: Colors.grey,
@@ -650,10 +738,10 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Amperaje',
+                                'Corriente',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 24,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -673,7 +761,6 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                   ),
                 ],
               ),
-
               SizedBox(height: 16),
               Row(
                 children: [
@@ -685,7 +772,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         child: Container(
                           padding: EdgeInsets.all(16.0),
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 26, 60, 79),
+                            color: colorRPM,
                             borderRadius: BorderRadius.circular(12.0),
                             border: Border.all(
                               color: Colors.grey,
@@ -707,7 +794,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                 'Velocidad',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 24,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -734,7 +821,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         child: Container(
                           padding: EdgeInsets.all(16.0),
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 26, 60, 79),
+                            color: colorRPM,
                             borderRadius: BorderRadius.circular(12.0),
                             border: Border.all(
                               color: Colors.grey,
@@ -756,13 +843,13 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                 'RPM',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 24,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               SizedBox(height: 10),
                               Text(
-                                '${currentRPM.toStringAsFixed(1)} ',
+                                '${currentRPM.toStringAsFixed(0)} ',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 32,
@@ -775,17 +862,6 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                     ),
                   ),
                 ],
-              ),
-              Spacer(), // Asegura que el IconButton esté en la parte inferior
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: IconButton(
-                  icon: Icon(
-                    Icons.insert_chart,
-                    color: Colors.white,
-                  ),
-                  onPressed: _navigateToDataScreen,
-                ), // Botón de datos en modo vertical
               ),
             ],
           ),

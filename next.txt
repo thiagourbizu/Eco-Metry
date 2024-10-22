@@ -148,5 +148,3 @@ poner boludeces de la direccion y acomodar el auto (ez)
 codigo de rpm y velocidad (creo que ya lo tengo)
 y listo, proyecto termiando hermano
 pense que nunca diria eso viejo :v
-
-

@@ -6,6 +6,8 @@ import 'dart:async';
 import 'connection_screen.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'settings_screen.dart';
+import 'credits_screen.dart';
+
 
 class BluetoothApp extends StatefulWidget {
   @override
@@ -101,7 +103,7 @@ class _BluetoothAppState extends State<BluetoothApp> {
   }
 
   Future<void> _openGitHub() async {
-    final url = 'https://github.com/thiagourbizu/Eco-Metry/tree/main/ultimo/lib';
+    final url = 'https://github.com/thiagourbizu/Eco-Metry';
     try {
       await FlutterWebBrowser.openWebPage(url: url);
     } catch (e) {
@@ -134,7 +136,7 @@ class _BluetoothAppState extends State<BluetoothApp> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => SettingsScreen()),
+              MaterialPageRoute(builder: (context) => CreditsScreen()), // Navegar a la pantalla de créditos
             );
           },
           child: Text(
