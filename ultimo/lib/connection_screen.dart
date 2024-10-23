@@ -8,60 +8,6 @@ import 'settings_manager.dart';
 import 'settings_screen.dart';
 //import 'package:kdgaugeview/kdgaugeview.dart';
 
-Widget _buildDataContainer(
-  String label,
-  String value,
-  String unit,
-  Color color,
-  VoidCallback onTap,
-) {
-  return GestureDetector(
-    //onTap: onTap,
-    child: Container(
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: Colors.grey,
-          width: 2.0,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          Text(
-            unit,
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-
 Color bordeA = Colors.grey;
 Color bordeT = Colors.grey;
 Color bordeVel = Colors.grey;
@@ -92,18 +38,177 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   double currentCurrent = 0.0;
   double currentRPM = 0.0;
   double currentHumedad = 0.0;
+  final TextEditingController _temperatureController = TextEditingController();
+  final TextEditingController _humidityController = TextEditingController();
+  final TextEditingController _voltageController = TextEditingController();
+  final TextEditingController _amperageController = TextEditingController();
   final StreamController<List<String>> _streamController =
       StreamController<List<String>>.broadcast();
 
   Timer? _updateTimer;
 
   @override
-  void initState() {
+   void initState() {
     super.initState();
     _connectToDevice();
-    _startSpeedometerUpdate(); // Iniciar actualización del velocímetro
+    _startSpeedometerUpdate();
+    _loadSettings(); // Iniciar actualización del velocímetro
   }
-  
+  //Clases para el drawer
+Future<void> _loadSettings() async {
+  final settings = SettingsManager();
+  await settings.init(); // Asegúrate de inicializar
+
+  setState(() {
+    // Inicializa en 0 si no hay configuración guardada
+    _temperatureController.text = settings.temperatureMax.isNotEmpty ? settings.temperatureMax : '0';
+    _humidityController.text = settings.humidityMax.isNotEmpty ? settings.humidityMax : '0';
+    _voltageController.text = settings.voltageMax.isNotEmpty ? settings.voltageMax : '0';
+    _amperageController.text = settings.amperageMax.isNotEmpty ? settings.amperageMax : '0';
+  });
+}
+
+
+  Future<void> _saveSettings() async {
+    try {
+      final settings = SettingsManager();
+      await settings.setTemperatureMax(_temperatureController.text);
+      await settings.setHumidityMax(_humidityController.text);
+      await settings.setVoltageMax(_voltageController.text);
+      await settings.setAmperageMax(_amperageController.text);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Configuración guardada!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      print('Error saving settings: $e');
+    }
+  }
+
+  void _updateValue(TextEditingController controller, int delta) {
+    final currentValue = int.tryParse(controller.text) ?? 0;
+    final newValue = (currentValue + delta).clamp(0, double.infinity).toInt();
+    controller.text = newValue.toString();
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+    required String suffix,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style:
+              TextStyle(color: Colors.white, fontSize: 14), // Tamaño del texto
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Reducir el tamaño del TextField
+            Expanded(
+              child: SizedBox(
+                height: 60, // Ajusta la altura según sea necesario
+                child: TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    suffixText: suffix,
+                    filled: true,
+                    fillColor: Colors.blueGrey[600],
+                    contentPadding: EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 10.0), // Ajusta el padding
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    labelStyle: TextStyle(color: Colors.white),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+            ),
+            // Reducir el tamaño de los iconos y ajustar espaciado
+            Column(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.arrow_upward, color: Colors.white),
+                  iconSize: 16, // Tamaño del ícono reducido
+                  padding: EdgeInsets.all(4.0), // Ajustar padding del botón
+                  onPressed: () => _updateValue(controller, 1),
+                ),
+                IconButton(
+                  icon: Icon(Icons.arrow_downward, color: Colors.white),
+                  iconSize: 16, // Tamaño del ícono reducido
+                  padding: EdgeInsets.all(4.0), // Ajustar padding del botón
+                  onPressed: () => _updateValue(controller, -1),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDataContainer(
+    String label,
+    String value,
+    String unit,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      //onTap: onTap,
+      child: Container(
+        width: 120,
+        height: 120,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+            color: Colors.grey,
+            width: 2.0,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 6),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            Text(
+              unit,
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
 
   void _connectToDevice() async {
     try {
@@ -274,65 +379,72 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   Widget build(BuildContext context) {
     final orientation = MediaQuery.of(context).orientation;
 
-    Color colorT = double.parse(SettingsManager().temperatureMax) <= currentTemperature
-    ? const Color.fromARGB(255, 167, 35, 26) // Red if current temperature exceeds max
-    : const Color.fromARGB(255, 26, 60, 79); // Default color
+    Color colorT =
+        double.parse(SettingsManager().temperatureMax) <= currentTemperature
+            ? const Color.fromARGB(
+                255, 167, 35, 26) // Red if current temperature exceeds max
+            : const Color.fromARGB(255, 26, 60, 79); // Default color
 
     Color colorH = double.parse(SettingsManager().humidityMax) <= currentHumedad
-    ? const Color.fromARGB(255, 167, 35, 26) // Red if current temperature exceeds max
-    : const Color.fromARGB(255, 26, 60, 79); // Default color
+        ? const Color.fromARGB(
+            255, 167, 35, 26) // Red if current temperature exceeds max
+        : const Color.fromARGB(255, 26, 60, 79); // Default color
 
     Color colorV = double.parse(SettingsManager().voltageMax) <= currentVoltage
-    ? const Color.fromARGB(255, 167, 35, 26) // Red if current temperature exceeds max
-    : const Color.fromARGB(255, 26, 60, 79); // Default color
+        ? const Color.fromARGB(
+            255, 167, 35, 26) // Red if current temperature exceeds max
+        : const Color.fromARGB(255, 26, 60, 79); // Default color
 
     Color colorA = double.parse(SettingsManager().amperageMax) <= currentCurrent
-    ? const Color.fromARGB(255, 167, 35, 26) // Red if current temperature exceeds max
-    : const Color.fromARGB(255, 26, 60, 79); // Default color
+        ? const Color.fromARGB(
+            255, 167, 35, 26) // Red if current temperature exceeds max
+        : const Color.fromARGB(255, 26, 60, 79); // Default color
 
     Color colorRPM = currentSpeed <= 5
-    ? const Color.fromARGB(255, 26, 60, 79) // Color predeterminado si la velocidad es <= 5 km/h
-    : currentSpeed <= 20
-        ? const Color.fromARGB(255, 0, 255, 0) // Verde si la velocidad es > 5 y <= 20 km/h
-        : currentSpeed <= 40
-            ? const Color.fromARGB(255, 255, 165, 0) // Naranja si la velocidad es > 20 y <= 40 km/h
-            : const Color.fromARGB(255, 167, 35, 26); // Rojo si la velocidad es > 40 km/h
-
-
+        ? const Color.fromARGB(255, 26, 60,
+            79) // Color predeterminado si la velocidad es <= 5 km/h
+        : currentSpeed <= 20
+            ? const Color.fromARGB(
+                255, 0, 255, 0) // Verde si la velocidad es > 5 y <= 20 km/h
+            : currentSpeed <= 40
+                ? const Color.fromARGB(255, 255, 165,
+                    0) // Naranja si la velocidad es > 20 y <= 40 km/h
+                : const Color.fromARGB(
+                    255, 167, 35, 26); // Rojo si la velocidad es > 40 km/h
 
     if (orientation == Orientation.landscape) {
       // Modo horizontal
       return Scaffold(
-  backgroundColor: Colors.blueGrey[900],
-  appBar: AppBar(
-    backgroundColor: const Color.fromARGB(255, 78, 161, 202),
-    title: Text(
-      'Tablero',
-      style: TextStyle(color: Colors.white),
-    ),
-    iconTheme: IconThemeData(color: Colors.white),
-    actions: [
-      ElevatedButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => SettingsScreen()),
-          );
-        },
-        child: Icon(
-          Icons.settings, // Ícono de engranaje
-          color: Colors.white,
+        backgroundColor: Colors.blueGrey[900],
+        appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 78, 161, 202),
+          title: Text(
+            'Tablero',
+            style: TextStyle(color: Colors.white),
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SettingsScreen()),
+                );
+              },
+              child: Icon(
+                Icons.settings, // Ícono de engranaje
+                color: Colors.white,
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 26, 79, 104),
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
         ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 26, 79, 104),
-          foregroundColor: Colors.white,
-        ),
-      ),
-    ],
-  ),
-  body: Center(
-    child: Row(
-      children: [
+        body: Center(
+          child: Row(
+            children: [
               // Nuevo velocímetro a la izquierda con margen izquierdo
               Padding(
                 padding: const EdgeInsets.only(
@@ -375,12 +487,9 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                     GaugeRange(
                                       startValue: 0,
                                       endValue: value < 20 ? value : 20,
-                                       
                                       color: Colors.green,
-                                      
                                       startWidth: 20,
                                       endWidth: 20,
-                                      
                                     ),
                                     // Color naranja
                                     GaugeRange(
@@ -513,45 +622,41 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     } else {
       // Modo vertical
       return Scaffold(
-  backgroundColor: Colors.blueGrey[900],
-  appBar: AppBar(
-    backgroundColor: const Color.fromARGB(255, 78, 161, 202),
-    title: Text(
-      'Gráfico',
-      style: TextStyle(color: Colors.white),
-    ),
-    iconTheme: IconThemeData(color: Colors.white),
-    actions: [
-      IconButton(
-        icon: Icon(
-          Icons.insert_chart,
-          color: Colors.white,
+        backgroundColor: Colors.blueGrey[900],
+        appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 78, 161, 202),
+          title: Text(
+            'Gráfico',
+            style: TextStyle(color: Colors.white),
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+          actions: [
+            IconButton(
+              icon: Icon(
+                Icons.insert_chart,
+                color: Colors.white,
+              ),
+              onPressed:
+                  _navigateToDataScreen, // Navegar a la pantalla de datos
+            ),
+            Builder(
+              // Usamos Builder para obtener el contexto correcto
+              builder: (context) {
+                return IconButton(
+                  icon: Icon(Icons.menu), // Ícono de hamburguesa
+                  onPressed: () {
+                    Scaffold.of(context).openEndDrawer(); // Abre el EndDrawer
+                  },
+                );
+              },
+            )
+          ],
         ),
-        onPressed: _navigateToDataScreen,
-      ),
-      ElevatedButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => SettingsScreen()),
-          );
-        },
-        child: Icon(
-          Icons.settings, // Ícono de engranaje
-          color: Colors.white,
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 26, 79, 104),
-          foregroundColor: Colors.white,
-        ),
-      ),
-    ],
-  ),
-  body: Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: Column(
-      children: [
-        if (isConnecting)
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              if (isConnecting)
                 Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -864,6 +969,68 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                 ],
               ),
             ],
+          ),
+        ),
+        endDrawer: Drawer(
+          backgroundColor: Colors.blueGrey[800],
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 30), // Espacio para bajar el título
+                Text(
+                  'Eco-Metry',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  'Configuraciones',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                ),
+                SizedBox(height: 1), // Espacio adicional para bajar los campos
+                _buildInputField(
+                  label: 'Temperatura Máxima',
+                  controller: _temperatureController,
+                  suffix: '°C',
+                ),
+                SizedBox(height: 2),
+                _buildInputField(
+                  label: 'Humedad Máxima',
+                  controller: _humidityController,
+                  suffix: '%',
+                ),
+                SizedBox(height: 6),
+                _buildInputField(
+                  label: 'Tensión Máximo',
+                  controller: _voltageController,
+                  suffix: 'V',
+                ),
+                SizedBox(height: 6),
+                _buildInputField(
+                  label: 'Corriente Máximo',
+                  controller: _amperageController,
+                  suffix: 'A',
+                ),
+                SizedBox(height: 10),
+                ElevatedButton.icon(
+                  onPressed: _saveSettings,
+                  icon: Icon(Icons.save), // Icono de guardado
+                  label: Text('Guardar Configuraciones'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueGrey[700],
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );

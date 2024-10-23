@@ -1,7 +1,7 @@
 plugins {
     id "com.android.application"
     id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    // El plugin de Flutter debe ser aplicado después de los plugins de Android y Kotlin.
     id "dev.flutter.flutter-gradle-plugin"
 }
 
@@ -25,7 +25,8 @@ if (flutterVersionName == null) {
 
 android {
     namespace = "com.example.ultimo"
-    compileSdk = flutter.compileSdkVersion
+    // Cambiamos a compileSdkVersion 33
+    compileSdkVersion 34
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -35,25 +36,26 @@ android {
 
     defaultConfig {
         applicationId = "com.example.ultimo"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        // Cambiamos a minSdkVersion y targetSdkVersion 33
+        minSdkVersion 21
+        targetSdkVersion 34
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
     }
 
     signingConfigs {
         release {
-            storeFile file("C:/Users/User/Desktop/Eco-Metry/my-release-key.jks") // Cambia esto a la ruta de tu keystore
-            storePassword "161214" // Cambia esto a la contraseña de tu keystore
-            keyAlias "thiagourbizu" // Cambia esto al alias de tu clave
-            keyPassword "161214" // Cambia esto a la contraseña de tu clave
+            storeFile file("C:/Users/User/Desktop/Eco-Metry/my-release-key.jks") // Asegúrate de que esta ruta sea correcta
+            storePassword "161214" // Ajusta a tu contraseña del keystore
+            keyAlias "thiagourbizu" // Ajusta a tu alias de clave
+            keyPassword "161214" // Ajusta a tu contraseña de clave
         }
     }
 
     buildTypes {
         release {
             signingConfig signingConfigs.release // Usa la configuración de firma definida
-            minifyEnabled true // Cambia esto a true para habilitar la reducción de código
+            minifyEnabled true // Habilita la reducción de código
             shrinkResources true // Habilita la eliminación de recursos no utilizados
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

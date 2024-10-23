@@ -15,7 +15,7 @@ class ChartsScreen extends StatelessWidget {
       case 'humidity':
         return 'Gráfico de Humedad';
       case 'voltage':
-        return 'Gráfico de Voltaje'; 
+        return 'Gráfico de Tensión'; 
       case 'current':
         return 'Gráfico de Corriente';
       case 'speed':
