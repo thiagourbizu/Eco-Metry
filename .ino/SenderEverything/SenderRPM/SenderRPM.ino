@@ -11,13 +11,18 @@
 #include "LoRaWan_APP.h"
 #include "Arduino.h"
 // Temp
-#include <DHT.h>
+#include <DHT.h> 
+
 // Hall
 #include <EEPROM.h>
 
 // Bluetooth
 HardwareSerial BTserial(1);
-
+/*
+ * set LoraWan_RGB to 1, the RGB active in loraWan
+ * RGB red means sending;
+ * RGB green means received done;
+ */
 #ifndef LoraWan_RGB
 #define LoraWan_RGB 1
 #endif
@@ -40,7 +45,6 @@ HardwareSerial BTserial(1);
 #define LORA_FIX_LENGTH_PAYLOAD_ON false
 #define LORA_IQ_INVERSION_ON false
 
-#define RX_TIMEOUT_VALUE 1000
 #define BUFFER_SIZE 50 // Increase buffer size to accommodate larger payload
 
 // Declaramos los baudios
@@ -78,7 +82,7 @@ volatile float RPM;
 volatile float DIST;
 volatile boolean eeprom_flag;
 
-float w_length = 2.050; // Pone el diametro de la rueda
+float w_length = 1.57075; // Pone el diametro de la rueda 3.1415 
 boolean state, button;
 
 // Variable de iteraciones de ambos Promedios
@@ -98,8 +102,6 @@ void setup() {
     pinMode(PinV, INPUT);
     pinMode(PinT, INPUT);
     pinMode(hallSensorPin, INPUT);
-
-    DIST = (float)EEPROM.read(0) / 10.0; // remember some distance
     
     //Serial.println("Test");
 
@@ -110,7 +112,7 @@ void setup() {
     Radio.SetTxConfig(MODEM_LORA, TX_OUTPUT_POWER, 0, LORA_BANDWIDTH,
                       LORA_SPREADING_FACTOR, LORA_CODINGRATE,
                       LORA_PREAMBLE_LENGTH, LORA_FIX_LENGTH_PAYLOAD_ON,
-                      true, 0, 0, LORA_IQ_INVERSION_ON, 3000);    
+                      true, 0, 0, LORA_IQ_INVERSION_ON, 3000);     
                              
 }
 void loop() {
@@ -158,7 +160,7 @@ void loop() {
       flag=1;
     }
 
-    if ((millis() - lastturn) > 2000)// if there is no signal more than 2 seconds
+    if ((millis() - lastturn) > 3500)// if there is no signal more than 2 seconds
     {       
       SPEED = 0;
       RPM = 0;
@@ -173,13 +175,11 @@ void loop() {
     float humidity = dht.readHumidity();
     float temperature = dht.readTemperature();
 
-    /*
     if(isnan(humidity) || isnan(temperature))
     {
-      Serial.println("Error 404.");
-      return;
+      humidity = 0.1;
+      temperature= 0.1;
     }
-    */
     
     // Transmisión cada X ms
     if (tiempoActual - tiempoInicioSegundos >= 150) 
@@ -188,7 +188,7 @@ void loop() {
       if (lora_idle) 
       {
         // Formatea la cadena con 4 valores
-        sprintf(txpacket,"%.2f,%d,%d,%.2f,%.2f,%.2f", temperature, humidity, RPM, voltaje, current, SPEED);
+        sprintf(txpacket,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f", temperature, humidity, RPM, voltaje, current, SPEED);
         //Serial.printf("\r\nsending packet \"%s\" , length %d\r\n", txpacket, strlen(txpacket));
         turnOnRGB(COLOR_SEND, 0); // Cambia el color del RGB
         Radio.Send((uint8_t *)txpacket, strlen(txpacket)); // Envía el paquete
