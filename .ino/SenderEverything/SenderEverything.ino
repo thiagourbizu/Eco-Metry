@@ -43,7 +43,6 @@ HardwareSerial BTserial(1);
 #define LORA_FIX_LENGTH_PAYLOAD_ON false
 #define LORA_IQ_INVERSION_ON false
 
-#define RX_TIMEOUT_VALUE 1000
 #define BUFFER_SIZE 50 // Increase buffer size to accommodate larger payload
 
 // Declaramos los baudios
