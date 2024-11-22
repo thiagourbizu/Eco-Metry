@@ -60,7 +60,7 @@ int16_t rssi,rxSize;
 bool lora_idle = true;
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
 
     txNumber=0;
     rssi=0;
@@ -82,7 +82,7 @@ void loop()
 {
   if(lora_idle)
   {
-    turnOffRGB();
+    //turnOffRGB();
     lora_idle = false;
     Serial.println("into RX mode");
     Radio.Rx(0);
@@ -95,7 +95,6 @@ void OnRxDone( uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr )
     rxSize=size;
     memcpy(rxpacket, payload, size );
     rxpacket[size]='\0';
-    turnOnRGB(COLOR_RECEIVED,0);
     Radio.Sleep( );
     Serial.printf("\r\nreceived packet \"%s\" with rssi %d , length %d\r\n",rxpacket,rssi,rxSize);
     lora_idle = true;

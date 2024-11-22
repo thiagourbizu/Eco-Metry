@@ -60,13 +60,13 @@ bool lora_idle = true;
 
 // Temperature Settings
 #define DHTTYPE DHT11
-#define DHTPIN GPIO8
+#define DHTPIN 8
 
 // Inicializamos
 DHT dht(DHTPIN, DHTTYPE);
 
 // Definimos el pin donde conectaremos el sensor Hall
-#define hallSensorPin GPIO9
+#define hallSensorPin 9
 
 // Variables para contar!
 int contador = 0;
@@ -190,7 +190,7 @@ void loop() {
         // Formatea la cadena con 4 valores
         sprintf(txpacket,"%.2f,%d,%d,%.2f,%.2f,%.2f", temperature, humidity, RPM, voltaje, current, SPEED);
         //Serial.printf("\r\nsending packet \"%s\" , length %d\r\n", txpacket, strlen(txpacket));
-        turnOnRGB(COLOR_SEND, 0); // Cambia el color del RGB
+        //turnOnRGB(COLOR_SEND, 0); // Cambia el color del RGB
         Radio.Send((uint8_t *)txpacket, strlen(txpacket)); // Envía el paquete
         lora_idle = false;
          
@@ -206,13 +206,13 @@ void loop() {
 }
  
 void OnTxDone(void) {
-    turnOffRGB();
+    //turnOffRGB();
     //Serial.println("TX done......");
     lora_idle = true;
 }
 
 void OnTxTimeout(void) {
-    turnOffRGB();
+    //turnOffRGB();
     Radio.Sleep();
     //Serial.println("TX Timeout......");
     lora_idle = true;
