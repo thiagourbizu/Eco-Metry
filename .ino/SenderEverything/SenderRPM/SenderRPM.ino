@@ -192,7 +192,7 @@ void loop() {
         //Serial.printf("\r\nsending packet \"%s\" , length %d\r\n", txpacket, strlen(txpacket));
         //turnOnRGB(COLOR_SEND, 0); // Cambia el color del RGB
         Radio.Send((uint8_t *)txpacket, strlen(txpacket)); // Envía el paquete
-        lora_idle = false;
+        //lora_idle = false;
          
         
         String cadena = String(temperature) + "," + String(humidity) + "," + String(RPM) + "," +  String(voltaje) + "," + String(current) + "," + String(SPEED);  
@@ -201,6 +201,7 @@ void loop() {
         Serial.println(cadena);
         
       }
+      Radio.IrqProcess( );
     }
     
 }
