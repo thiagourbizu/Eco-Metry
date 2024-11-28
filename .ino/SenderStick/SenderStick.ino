@@ -55,7 +55,6 @@ DHT dht(DHTPIN, DHTTYPE);
 // Definicion de pines
 #define PinA 2
 #define PinV 1
-#define PinT 0
 #define hallSensorPin 36
 
 // Variables para contar!
@@ -91,7 +90,7 @@ void setup() {
     BTserial.begin(115200);
     pinMode(PinA, INPUT);
     pinMode(PinV, INPUT);
-    pinMode(PinT, INPUT);
+    pinMode(DHTPIN, INPUT);
     pinMode(hallSensorPin, INPUT);
     
     Mcu.begin(HELTEC_BOARD,SLOW_CLK_TPYE);
@@ -121,6 +120,7 @@ void loop()
     float current=0;
     for (int i=0;i<=150;i++)
     {
+       //Serial.println(i);
        LecturaA = analogRead(PinA) * (3.3/4095);
        LecturaA_1 = (LecturaA - 2.24303144561052336669604301278013736) / 0.1;
        PromedioA += LecturaA_1;
@@ -128,23 +128,35 @@ void loop()
     }
     // Promedio
     current=PromedioA/150;
+    current+=6.9;
+    //   Filtro para ruido
+    if (current < 0)
+      current = 0;
+    
 
     // Volts ------------------------------------
-    float LecturaV = 0;
-    float LecturaV_1 = 0; 
-    float R1 = 7642000; // resistencia R1 en ohm
+    float LecturaV=0;
+    float LecturaV_1=0;
+    float PromedioV=0;
+    float voltaje=0;
+    float R1 = 22601200 ; // resistencia R1 en ohm
     float R2 = 1000000;  // resistencia R2 en ohm
-    float voltaje = 0; 
-    float PromedioV = 0;
+    
     for (int i=0;i<=150;i++)
     {
-       LecturaV = analogRead(PinV) * (3.3/4095);   
-       LecturaV_1=LecturaV * (R1 + R2) / R2;
+       //Serial.println(i);
+       LecturaV = analogRead(PinV) * (3.3/4095);
+  
+       LecturaV_1 = LecturaV * (R1 + R2) / R2;
        PromedioV += LecturaV_1;
        // 100 vueltas...
     }
     // Promedio
     voltaje=PromedioV/150;
+    //   Filtro para ruido
+    if (voltaje < 18.40)
+      voltaje = 0;
+    
     // Velocidad ------------------------------------
     if(digitalRead(hallSensorPin) == HIGH)
       flag=0;
@@ -173,7 +185,7 @@ void loop()
       temperature= 0.1;
     }
     
-    if ((millis() - lastturn) > 3500)// if there is no signal more than 2 seconds
+    if ((millis() - lastturn) > 2000)// if there is no signal more than 2 seconds
     {       
       SPEED = 0;
       RPM = 0;
@@ -187,6 +199,7 @@ void loop()
 	if (lora_idle && (millis() - lastSendTime > 150)) {
         // Formatea la cadena con 4 valores
         sprintf(txpacket,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f", temperature, humidity, RPM, voltaje, current, SPEED);
+        //Serial.print(LecturaV);
         //Serial.printf("\r\nsending packet \"%s\" , length %d\r\n", txpacket, strlen(txpacket));
         //turnOnRGB(COLOR_SEND, 0); // Cambia el color del RGB
         Radio.Send((uint8_t *)txpacket, strlen(txpacket)); // Envía el paquete
