@@ -67,7 +67,7 @@ volatile float RPM;
 volatile float DIST;
 volatile boolean eeprom_flag;
 
-float w_length = 1.57075; // Diametro de la rueda
+float w_length = 1.57075; // Pone el diametro de la rueda 3.1415 
 boolean state, button;
 
 
@@ -113,7 +113,7 @@ void setup() {
 
 void loop()
 {
-  // Current ------------------------------------
+    // Current ------------------------------------
     float LecturaA=0;
     float PromedioA = 0;
     float LecturaA_1;
@@ -128,39 +128,31 @@ void loop()
     }
     // Promedio
     current=PromedioA/150;
-    current+=6.9;
-    //   Filtro para ruido
-    if (current < 0)
+    current += 6.90;
+    // Filtro
+    if(current < 0)
       current = 0;
-    
 
     // Volts ------------------------------------
-    float LecturaV=0;
-    float LecturaV_1=0;
-    float PromedioV=0;
-    float voltaje=0;
-    float R1 = 22601200 ; // resistencia R1 en ohm
-    float R2 = 1000000;  // resistencia R2 en ohm
-    
-    for (int i=0;i<=150;i++)
+    float LecturaV = 0;
+    float PromedioV = 0;
+    float voltaje = 0;
+    for(int i=0;i<150;i++)
     {
-       //Serial.println(i);
-       LecturaV = analogRead(PinV) * (3.3/4095);
-  
-       LecturaV_1 = LecturaV * (R1 + R2) / R2;
-       PromedioV += LecturaV_1;
-       // 100 vueltas...
-    }
-    // Promedio
+      //Serial.print(i);
+      LecturaV = analogRead(1) - 948,55; 
+      PromedioV+=LecturaV/4.2;
+    } 
+    // Filtro 
     voltaje=PromedioV/150;
-    //   Filtro para ruido
-    if (voltaje < 18.40)
-      voltaje = 0;
+    if(voltaje < 0)
+      voltage=0;
     
     // Velocidad ------------------------------------
     if(digitalRead(hallSensorPin) == HIGH)
       flag=0;
-    
+
+    // Flag para que no sume constantemente
     if(digitalRead(hallSensorPin) == LOW && flag == 0)
     {
       if (millis() - lastturn > 80)  // simple noise cut filter (based on fact that you will not be ride your bike more than 120 km/h =)
@@ -174,17 +166,7 @@ void loop()
       eeprom_flag = 1;
       flag=1;
     }
-
-     // Temperature ------------------------------------
-    float humidity = dht.readHumidity();
-    float temperature = dht.readTemperature();
-
-    if(isnan(humidity) || isnan(temperature))
-    {
-      humidity = 0.1;
-      temperature= 0.1;
-    }
-    
+  
     if ((millis() - lastturn) > 2000)// if there is no signal more than 2 seconds
     {       
       SPEED = 0;
@@ -195,7 +177,17 @@ void loop()
         eeprom_flag = 0;// flag down. To prevent rewritind
       }
     }
-   
+    
+     // Temperature ------------------------------------
+    float humidity = dht.readHumidity();
+    float temperature = dht.readTemperature();
+
+    if(isnan(humidity) || isnan(temperature))
+    {
+      humidity = 1;
+      temperature= 1;
+    }
+
 	if (lora_idle && (millis() - lastSendTime > 150)) {
         // Formatea la cadena con 4 valores
         sprintf(txpacket,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f", temperature, humidity, RPM, voltaje, current, SPEED);

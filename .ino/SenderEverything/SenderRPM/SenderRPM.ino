@@ -132,7 +132,7 @@ void loop() {
     current=PromedioA/iteracionesPromedio;
     
     // Volts ------------------------------------
-    float LecturaV = analogRead(PinV) * (3.3/4095);   
+    float LecturaV = analogRead(1) * (3.3/4095) + 0.14  ;   
     float R1 = 15600000; // resistencia R1 en ohm
     float R2 = 1000000;  // resistencia R2 en ohm
 
