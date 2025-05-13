@@ -8,5 +8,4 @@ Cualquier foto o imagen que sirva para el proyecto se guarda en la carpeta PDF's
 
 
 -Matias Galliano
--Ignacio Makara
 -Thiago Urbizu
